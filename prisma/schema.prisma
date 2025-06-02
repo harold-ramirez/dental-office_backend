@@ -1,0 +1,342 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model appointment {
+  Id                    Int                 @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
+  dateHour              DateTime            @db.DateTime(0)
+  AppointmentRequest_Id Int?                @db.UnsignedMediumInt
+  DiagnosedProcedure_Id Int?                @db.UnsignedInt
+  Patient_Id            Int                 @db.UnsignedMediumInt
+  AppUser_Id            Int                 @db.UnsignedTinyInt
+  registerDate          DateTime            @default(now()) @db.Timestamp(0)
+  updateDate            DateTime?           @db.Timestamp(0)
+  status                Boolean             @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser               appuser             @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppUser1")
+  appointmentrequest    appointmentrequest? @relation(fields: [AppointmentRequest_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppointmentRequest1")
+  diagnosedprocedure    diagnosedprocedure? @relation(fields: [DiagnosedProcedure_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_DiagnosedProcedure1")
+  patient               patient             @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Patient1")
+
+  @@index([AppUser_Id], map: "fk_Appointment_AppUser1_idx")
+  @@index([AppointmentRequest_Id], map: "fk_Appointment_AppointmentRequest1_idx")
+  @@index([DiagnosedProcedure_Id], map: "fk_Appointment_DiagnosedProcedure1_idx")
+  @@index([Patient_Id], map: "fk_Appointment_Patient1_idx")
+}
+
+model appointmentrequest {
+  Id              Int           @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
+  patientFullName String        @db.VarChar(100)
+  dateHourRequest DateTime      @db.DateTime(0)
+  phoneNumber     String        @db.VarChar(15)
+  message         String        @db.VarChar(200)
+  AppUser_Id      Int?          @db.UnsignedTinyInt
+  registerDate    DateTime      @default(now()) @db.Timestamp(0)
+  updateDate      DateTime?     @db.Timestamp(0)
+  status          Boolean       @default(dbgenerated("b'1'")) @db.Bit(1)
+  appointment     appointment[]
+  appuser         appuser?      @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_AppointmentRequest_AppUser1")
+
+  @@index([AppUser_Id], map: "fk_AppointmentRequest_AppUser1_idx")
+}
+
+model appuser {
+  Id                          Int                           @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  username                    String                        @db.VarChar(45)
+  password                    String                        @db.VarChar(45)
+  name                        String                        @db.VarChar(45)
+  paternalSurname             String?                       @db.VarChar(45)
+  maternalSurname             String?                       @db.VarChar(45)
+  gender                      String                        @db.Char(1)
+  phoneNumber                 String                        @db.VarChar(15)
+  AppUser_Id                  Int                           @db.UnsignedTinyInt
+  registerDate                DateTime                      @default(now()) @db.Timestamp(0)
+  updateDate                  DateTime?                     @db.Timestamp(0)
+  status                      Boolean                       @default(dbgenerated("b'1'")) @db.Bit(1)
+  appointment                 appointment[]
+  appointmentrequest          appointmentrequest[]
+  appuser                     appuser                       @relation("appuserToappuser", fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_AppUser_AppUser1")
+  other_appuser               appuser[]                     @relation("appuserToappuser")
+  complementaryimage          complementaryimage[]
+  diagnosedprocedure          diagnosedprocedure[]
+  habits                      habits[]
+  medicalhistoryform          medicalhistoryform[]
+  odontogram                  odontogram[]
+  patient                     patient[]
+  payment                     payment[]
+  personalpathologicalhistory personalpathologicalhistory[]
+  shift                       shift[]
+  tooth                       tooth[]
+  toothsection                toothsection[]
+  treatment                   treatment[]
+
+  @@index([AppUser_Id], map: "fk_AppUser_AppUser1_idx")
+}
+
+model complementaryimage {
+  Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  fileName     String?   @db.VarChar(45)
+  filePath     String?   @db.VarChar(45)
+  captureDate  DateTime? @db.DateTime(0)
+  Patient_Id   Int       @db.UnsignedMediumInt
+  AppUser_Id   Int       @db.UnsignedTinyInt
+  registerDate DateTime  @default(now()) @db.Timestamp(0)
+  updateDate   DateTime? @db.Timestamp(0)
+  status       Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser      appuser   @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ComplementaryImage_AppUser1")
+  patient      patient   @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ComplementaryImage_Patient")
+
+  @@index([AppUser_Id], map: "fk_ComplementaryImage_AppUser1_idx")
+  @@index([Patient_Id], map: "fk_ComplementaryImage_Patient_idx")
+}
+
+model diagnosedprocedure {
+  Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  description              String?                    @db.VarChar(200)
+  totalCost                Decimal?                   @db.Decimal(7, 2)
+  Patient_Id               Int                        @db.UnsignedMediumInt
+  Treatment_Id             Int                        @db.UnsignedTinyInt
+  AppUser_Id               Int                        @db.UnsignedTinyInt
+  registerDate             DateTime                   @default(now()) @db.Timestamp(0)
+  updateDate               DateTime?                  @db.Timestamp(0)
+  status                   Boolean                    @default(dbgenerated("b'1'")) @db.Bit(1)
+  appointment              appointment[]
+  appuser                  appuser                    @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_AppUser1")
+  patient                  patient                    @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Patient1")
+  treatment                treatment                  @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Treatment1")
+  diagnosedprocedure_tooth diagnosedprocedure_tooth[]
+  payment                  payment[]
+
+  @@index([AppUser_Id], map: "fk_DiagnosedProcedure_AppUser1_idx")
+  @@index([Patient_Id], map: "fk_DiagnosedProcedure_Patient1_idx")
+  @@index([Treatment_Id], map: "fk_DiagnosedProcedure_Treatment1_idx")
+}
+
+model diagnosedprocedure_tooth {
+  DiagnosedProcedure_Id Int                @db.UnsignedInt
+  Tooth_Id              Int                @db.UnsignedInt
+  diagnosedprocedure    diagnosedprocedure @relation(fields: [DiagnosedProcedure_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_has_Tooth_DiagnosedProcedure1")
+  tooth                 tooth              @relation(fields: [Tooth_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_has_Tooth_Tooth1")
+
+  @@id([DiagnosedProcedure_Id, Tooth_Id])
+  @@index([DiagnosedProcedure_Id], map: "fk_DiagnosedProcedure_has_Tooth_DiagnosedProcedure1_idx")
+  @@index([Tooth_Id], map: "fk_DiagnosedProcedure_has_Tooth_Tooth1_idx")
+}
+
+model habits {
+  Id                        Int                         @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  name                      String                      @db.VarChar(45)
+  AppUser_Id                Int                         @db.UnsignedTinyInt
+  registerDate              DateTime                    @default(now()) @db.Timestamp(0)
+  updateDate                DateTime?                   @db.Timestamp(0)
+  status                    Boolean                     @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser                   appuser                     @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Habits_AppUser1")
+  medicalhistoryform_habits medicalhistoryform_habits[]
+
+  @@index([AppUser_Id], map: "fk_Habits_AppUser1_idx")
+}
+
+model medicalhistoryform {
+  Id                                             Int                                              @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
+  hasAllegry                                     Boolean                                          @db.Bit(1)
+  allergies                                      String?                                          @db.VarChar(45)
+  isPregnant                                     Boolean?                                         @db.Bit(1)
+  pregnantMonths                                 Int?                                             @db.TinyInt
+  medicalTreatment                               String?                                          @db.VarChar(45)
+  takingMedicine                                 String?                                          @db.VarChar(45)
+  hadHemorrhageAfterDentalExtraction             Boolean?                                         @db.Bit(1)
+  hemorrhageType                                 String?                                          @db.VarChar(45)
+  tmj                                            String?                                          @db.VarChar(45)
+  lymphNodes                                     String?                                          @db.VarChar(45)
+  breathing                                      String?                                          @db.VarChar(45)
+  others                                         String?                                          @db.VarChar(45)
+  lips                                           String?                                          @db.VarChar(45)
+  tongue                                         String?                                          @db.VarChar(45)
+  palate                                         String?                                          @db.VarChar(45)
+  mouthFloor                                     String?                                          @db.VarChar(45)
+  buccalMucous                                   String?                                          @db.VarChar(45)
+  gums                                           String?                                          @db.VarChar(45)
+  useIntraoralProsthesis                         Boolean?                                         @db.Bit(1)
+  prosthesisLocation                             String?                                          @db.VarChar(45)
+  lastTimeVisitedDentist                         String?                                          @db.VarChar(45)
+  useToothbrush                                  Boolean?                                         @db.Bit(1)
+  useDentalFloss                                 Boolean?                                         @db.Bit(1)
+  useMouthWash                                   Boolean?                                         @db.Bit(1)
+  toothBrushingFrequency                         String?                                          @db.VarChar(45)
+  hasBleedingDuringToothBrushing                 String?                                          @db.VarChar(45)
+  oralHygiene                                    String?                                          @db.VarChar(45)
+  Patient_Id                                     Int                                              @db.UnsignedMediumInt
+  AppUser_Id                                     Int                                              @db.UnsignedTinyInt
+  registerDate                                   DateTime                                         @default(now()) @db.Timestamp(0)
+  updateDate                                     DateTime?                                        @db.Timestamp(0)
+  status                                         Boolean?                                         @db.Bit(1)
+  appuser                                        appuser                                          @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_AppUser1")
+  patient                                        patient                                          @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_Patient1")
+  medicalhistoryform_habits                      medicalhistoryform_habits[]
+  medicalhistoryform_personalpathologicalhistory medicalhistoryform_personalpathologicalhistory[]
+  odontogram                                     odontogram?
+
+  @@index([AppUser_Id], map: "fk_MedicalHistoryForm_AppUser1_idx")
+  @@index([Patient_Id], map: "fk_MedicalHistoryForm_Patient1_idx")
+}
+
+model medicalhistoryform_habits {
+  MedicalHistoryForm_Id Int                @db.UnsignedMediumInt
+  Habits_Id             Int                @db.UnsignedTinyInt
+  habits                habits             @relation(fields: [Habits_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_has_Habits_Habits1")
+  medicalhistoryform    medicalhistoryform @relation(fields: [MedicalHistoryForm_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_has_Habits_MedicalHistoryForm1")
+
+  @@id([MedicalHistoryForm_Id, Habits_Id])
+  @@index([Habits_Id], map: "fk_MedicalHistoryForm_has_Habits_Habits1_idx")
+  @@index([MedicalHistoryForm_Id], map: "fk_MedicalHistoryForm_has_Habits_MedicalHistoryForm1_idx")
+}
+
+model medicalhistoryform_personalpathologicalhistory {
+  PersonalPathologicalHistory_Id Int                         @db.UnsignedTinyInt
+  MedicalHistoryForm_Id          Int                         @db.UnsignedMediumInt
+  medicalhistoryform             medicalhistoryform          @relation(fields: [MedicalHistoryForm_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PersonalPathologicalHistory_has_MedicalHistoryForm_Medical1")
+  personalpathologicalhistory    personalpathologicalhistory @relation(fields: [PersonalPathologicalHistory_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PersonalPathologicalHistory_has_MedicalHistoryForm_Persona1")
+
+  @@id([PersonalPathologicalHistory_Id, MedicalHistoryForm_Id])
+  @@index([MedicalHistoryForm_Id], map: "fk_PersonalPathologicalHistory_has_MedicalHistoryForm_Medic_idx")
+  @@index([PersonalPathologicalHistory_Id], map: "fk_PersonalPathologicalHistory_has_MedicalHistoryForm_Perso_idx")
+}
+
+model odontogram {
+  Id                 Int                @id @db.UnsignedMediumInt
+  model              String             @db.VarChar(10)
+  AppUser_Id         Int                @db.UnsignedTinyInt
+  registerDate       DateTime           @default(now()) @db.Timestamp(0)
+  updateDate         DateTime?          @db.Timestamp(0)
+  status             Boolean            @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser            appuser            @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Odontogram_AppUser1")
+  medicalhistoryform medicalhistoryform @relation(fields: [Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Odontogram_MedicalHistoryForm1")
+  tooth              tooth[]
+
+  @@index([AppUser_Id], map: "fk_Odontogram_AppUser1_idx")
+  @@index([Id], map: "fk_Odontogram_MedicalHistoryForm1_idx")
+}
+
+model patient {
+  Id                 Int                  @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
+  name               String               @db.VarChar(45)
+  paternalSurname    String?              @db.VarChar(45)
+  maternalSurname    String?              @db.VarChar(45)
+  gender             String               @db.Char(1)
+  phoneNumber        String?              @db.VarChar(15)
+  placeOfBirth       String               @db.VarChar(50)
+  birthdate          DateTime             @db.Date
+  occupation         String?              @db.VarChar(50)
+  address            String?              @db.VarChar(100)
+  AppUser_Id         Int                  @db.UnsignedTinyInt
+  registerDate       DateTime             @default(now()) @db.Timestamp(0)
+  updateDate         DateTime?            @db.Timestamp(0)
+  status             Boolean              @default(dbgenerated("b'1'")) @db.Bit(1)
+  appointment        appointment[]
+  complementaryimage complementaryimage[]
+  diagnosedprocedure diagnosedprocedure[]
+  medicalhistoryform medicalhistoryform[]
+  appuser            appuser              @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Patient_AppUser1")
+
+  @@index([AppUser_Id], map: "fk_Patient_AppUser1_idx")
+}
+
+model payment {
+  Id                    Int                @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  amount                Decimal            @db.Decimal(7, 2)
+  DiagnosedProcedure_Id Int                @db.UnsignedInt
+  AppUser_Id            Int                @db.UnsignedTinyInt
+  registerDate          DateTime           @default(now()) @db.Timestamp(0)
+  updateDate            DateTime?          @db.Timestamp(0)
+  status                Boolean            @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser               appuser            @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Payment_AppUser1")
+  diagnosedprocedure    diagnosedprocedure @relation(fields: [DiagnosedProcedure_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Payment_DiagnosedProcedure1")
+
+  @@index([AppUser_Id], map: "fk_Payment_AppUser1_idx")
+  @@index([DiagnosedProcedure_Id], map: "fk_Payment_DiagnosedProcedure1_idx")
+}
+
+model personalpathologicalhistory {
+  Id                                             Int                                              @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  name                                           String                                           @db.VarChar(45)
+  AppUser_Id                                     Int                                              @db.UnsignedTinyInt
+  registerDate                                   DateTime                                         @default(now()) @db.Timestamp(0)
+  updateDate                                     DateTime?                                        @db.Timestamp(0)
+  status                                         Boolean                                          @default(dbgenerated("b'1'")) @db.Bit(1)
+  medicalhistoryform_personalpathologicalhistory medicalhistoryform_personalpathologicalhistory[]
+  appuser                                        appuser                                          @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PersonalPathologicalHistory_AppUser1")
+
+  @@index([AppUser_Id], map: "fk_PersonalPathologicalHistory_AppUser1_idx")
+}
+
+model shift {
+  Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  entryHour    DateTime  @db.Time(0)
+  exitHour     DateTime  @db.Time(0)
+  WorkDay_Id   Int       @db.UnsignedTinyInt
+  AppUser_Id   Int       @db.UnsignedTinyInt
+  registerDate DateTime? @default(now()) @db.Timestamp(0)
+  updateDate   DateTime? @db.Timestamp(0)
+  status       Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  appuser      appuser   @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Shift_AppUser1")
+  workday      workday   @relation(fields: [WorkDay_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Shift_WorkDay1")
+
+  @@index([AppUser_Id], map: "fk_Shift_AppUser1_idx")
+  @@index([WorkDay_Id], map: "fk_Shift_WorkDay1_idx")
+}
+
+model tooth {
+  Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  name                     String?                    @db.VarChar(45)
+  pieceNumber              Int?                       @db.TinyInt
+  localStatus              String?                    @db.VarChar(45)
+  Odontogram_Id            Int                        @db.UnsignedMediumInt
+  AppUser_Id               Int                        @db.UnsignedTinyInt
+  registerDate             DateTime                   @default(now()) @db.Timestamp(0)
+  updateDate               DateTime?                  @db.Timestamp(0)
+  diagnosedprocedure_tooth diagnosedprocedure_tooth[]
+  appuser                  appuser                    @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_AppUser1")
+  odontogram               odontogram                 @relation(fields: [Odontogram_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_Odontogram1")
+  toothsection             toothsection[]
+
+  @@index([AppUser_Id], map: "fk_Tooth_AppUser1_idx")
+  @@index([Odontogram_Id], map: "fk_Tooth_Odontogram1_idx")
+}
+
+model toothsection {
+  Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  localStatus  String?   @db.VarChar(45)
+  Tooth_Id     Int       @db.UnsignedInt
+  AppUser_Id   Int       @db.UnsignedTinyInt
+  registerDate DateTime  @default(now()) @db.Timestamp(0)
+  updateDate   DateTime? @db.Timestamp(0)
+  appuser      appuser   @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ToothSection_AppUser1")
+  tooth        tooth     @relation(fields: [Tooth_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ToothSection_Tooth1")
+
+  @@index([AppUser_Id], map: "fk_ToothSection_AppUser1_idx")
+  @@index([Tooth_Id], map: "fk_ToothSection_Tooth1_idx")
+}
+
+model treatment {
+  Id                 Int                  @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  name               String               @db.VarChar(45)
+  description        String?              @db.VarChar(255)
+  registerDate       DateTime             @default(now()) @db.Timestamp(0)
+  updateDate         DateTime?            @db.Timestamp(0)
+  status             Boolean              @default(dbgenerated("b'1'")) @db.Bit(1)
+  AppUser_Id         Int                  @db.UnsignedTinyInt
+  diagnosedprocedure diagnosedprocedure[]
+  appuser            appuser              @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Treatment_AppUser1")
+
+  @@index([AppUser_Id], map: "fk_Treatment_AppUser1_idx")
+}
+
+model workday {
+  Id    Int     @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
+  day   String? @db.VarChar(10)
+  shift shift[]
+}
