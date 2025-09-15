@@ -6,17 +6,9 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class ShiftsService {
   constructor(private prisma: PrismaService) {}
-  
+
   async findAll() {
-    return this.prisma.shift.findMany({
-      where: { status: true },
-    });
-  }
-  
-  async findOne(id: number) {
-    return this.prisma.shift.findUnique({
-      where: { Id: id, status: true },
-    });
+    return this.prisma.shift.findMany();
   }
 
   async create(createShiftDto: CreateShiftDto) {
@@ -27,18 +19,11 @@ export class ShiftsService {
 
   async update(id: number, updateShiftDto: UpdateShiftDto) {
     return this.prisma.shift.update({
-      where: { Id: id, status: true },
+      where: { Id: id },
       data: {
         ...updateShiftDto,
         updateDate: new Date(),
-      }
-    });
-  }
-
-  async softDelete(id: number) {
-    return this.prisma.shift.update({
-      where: { Id: id, status: true },
-      data: { status: false },
+      },
     });
   }
 }

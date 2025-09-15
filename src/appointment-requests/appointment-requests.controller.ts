@@ -22,7 +22,7 @@ export class AppointmentRequestsController {
   }
 
   @Patch('/:id')
-  markAsRead(@Param('id') id: string) {
-    return this.appointmentRequestsService.markAsRead(+id, 1); //Hardcoded userId
+  markAsRead(@Param('id') id: string, @Body() appointmentData: any) {
+    return this.appointmentRequestsService.markAsRead(+id, 1, appointmentData); //Hardcoded userId
   }
 }

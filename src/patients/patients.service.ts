@@ -10,6 +10,7 @@ export class PatientsService {
   async findAll() {
     return this.prisma.patient.findMany({
       where: { status: true },
+      orderBy: { registerDate: 'desc' }
     });
   }
   

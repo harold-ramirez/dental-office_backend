@@ -1,6 +1,5 @@
 export class CreateShiftDto {
-  entryHour: string;
-  exitHour: string;
-  WorkDay_Id: number;
+  day: string;
+  hour: string;
   AppUser_Id: number;
 }

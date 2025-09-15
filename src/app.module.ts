@@ -7,7 +7,6 @@ import { PatientsModule } from './patients/patients.module';
 import { HabitsModule } from './habits/habits.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentRequestsModule } from './appointment-requests/appointment-requests.module';
-import { WorkDaysModule } from './work-days/work-days.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { WorkDaysModule } from './work-days/work-days.module';
     HabitsModule,
     AppointmentsModule,
     AppointmentRequestsModule,
-    WorkDaysModule,
   ],
 })
 export class AppModule {}
