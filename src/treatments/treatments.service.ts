@@ -31,14 +31,14 @@ export class TreatmentsService {
       data: {
         ...updateTreatmentDto,
         updateDate: new Date(),
-      }
+      },
     });
   }
 
   async softDelete(id: number) {
     return this.prisma.treatment.update({
       where: { Id: id, status: true },
-      data: { status: false },
+      data: { status: false, updateDate: new Date() },
     });
   }
 }

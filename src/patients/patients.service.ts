@@ -10,13 +10,53 @@ export class PatientsService {
   async findAll() {
     return this.prisma.patient.findMany({
       where: { status: true },
-      orderBy: { registerDate: 'desc' }
+      orderBy: { registerDate: 'desc' },
+      select: {
+        Id: true,
+        name: true,
+        paternalSurname: true,
+        maternalSurname: true,
+        gender: true,
+        cellphoneNumber: true,
+        telephoneNumber: true,
+        birthdate: true,
+      },
     });
   }
-  
+
   async findOne(id: number) {
     return this.prisma.patient.findUnique({
       where: { Id: id, status: true },
+      select: {
+        Id: true,
+        name: true,
+        paternalSurname: true,
+        maternalSurname: true,
+        gender: true,
+        cellphoneNumber: true,
+        telephoneNumber: true,
+        placeOfBirth: true,
+        birthdate: true,
+        occupation: true,
+        address: true,
+        complementaryimage: {
+          select: {
+            Id: true,
+            fileName: true,
+            filePath: true,
+            captureDate: true,
+            description: true,
+          },
+        },
+        registerDate: true,
+        updateDate: true,
+        appuser: {
+          select: {
+            Id: true,
+            username: true,
+          },
+        },
+      },
     });
   }
 
@@ -39,7 +79,7 @@ export class PatientsService {
   async softDelete(id: number) {
     return this.prisma.patient.update({
       where: { Id: id, status: true },
-      data: { status: false },
+      data: { status: false, updateDate: new Date() },
     });
   }
 }

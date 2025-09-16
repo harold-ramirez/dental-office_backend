@@ -4,5 +4,4 @@ import { CreateHabitDto } from './create-habit.dto';
 export class UpdateHabitDto extends PartialType(CreateHabitDto) {
   name?: string;
   AppUser_Id: number;
-  updateDate: Date | null;
 }

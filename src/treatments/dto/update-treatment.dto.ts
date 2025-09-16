@@ -5,5 +5,4 @@ export class UpdateTreatmentDto extends PartialType(CreateTreatmentDto) {
   name?: string;
   description?: string;
   AppUser_Id: number;
-  updateDate: Date | null;
 }

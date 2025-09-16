@@ -25,7 +25,10 @@ export class PersonalPathologiesService {
     });
   }
 
-  async update(id: number, updatePersonalPathologyDto: UpdatePersonalPathologyDto) {
+  async update(
+    id: number,
+    updatePersonalPathologyDto: UpdatePersonalPathologyDto,
+  ) {
     return this.prisma.personalpathologicalhistory.update({
       where: { Id: id, status: true },
       data: {
@@ -38,7 +41,7 @@ export class PersonalPathologiesService {
   async softDelete(id: number) {
     return this.prisma.personalpathologicalhistory.update({
       where: { Id: id, status: true },
-      data: { status: false },
+      data: { status: false, updateDate: new Date() },
     });
   }
 }

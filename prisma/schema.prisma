@@ -13,6 +13,7 @@ model appointment {
   AppointmentRequest_Id Int?                @db.UnsignedMediumInt
   DiagnosedProcedure_Id Int?                @db.UnsignedInt
   Patient_Id            Int                 @db.UnsignedMediumInt
+  minutesDuration       Int                 @db.TinyInt
   AppUser_Id            Int                 @db.UnsignedTinyInt
   registerDate          DateTime            @default(now()) @db.Timestamp(0)
   updateDate            DateTime?           @db.Timestamp(0)
@@ -225,8 +226,8 @@ model patient {
   gender             String               @db.Char(1)
   cellphoneNumber    String?              @db.VarChar(15)
   telephoneNumber    String?              @db.VarChar(15)
-  placeOfBirth       String               @db.VarChar(50)
-  birthdate          DateTime             @db.Date
+  placeOfBirth       String?              @db.VarChar(50)
+  birthdate          DateTime?            @db.Date
   occupation         String?              @db.VarChar(50)
   address            String?              @db.VarChar(100)
   AppUser_Id         Int                  @db.UnsignedTinyInt

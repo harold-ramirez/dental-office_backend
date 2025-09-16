@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { AppointmentRequestsService } from './appointment-requests.service';
 import { CreateAppointmentRequestDto } from './dto/create-appointment-request.dto';
 
 @Controller('appointment-requests')
 export class AppointmentRequestsController {
-  constructor(private readonly appointmentRequestsService: AppointmentRequestsService) {}
-  
+  constructor(
+    private readonly appointmentRequestsService: AppointmentRequestsService,
+  ) {}
+
   @Get('/')
   findAll() {
     return this.appointmentRequestsService.findAll();
   }
-  
+
+  @Get('/pastRequests')
+  findAllPast() {
+    return this.appointmentRequestsService.findAllPast();
+  }
+
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.appointmentRequestsService.findOne(+id);
@@ -21,8 +28,8 @@ export class AppointmentRequestsController {
     return this.appointmentRequestsService.create(createAppointmentRequestDto);
   }
 
-  @Patch('/:id')
-  markAsRead(@Param('id') id: string, @Body() appointmentData: any) {
-    return this.appointmentRequestsService.markAsRead(+id, 1, appointmentData); //Hardcoded userId
+  @Patch('/:id/:userId')
+  markAsRead(@Param('id') id: string, @Param('userId') userId: string) {
+    return this.appointmentRequestsService.markAsRead(+id, +userId);
   }
 }

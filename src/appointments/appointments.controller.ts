@@ -7,9 +7,19 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
   
-  @Get('/')
-  findAll() {
-    return this.appointmentsService.findAll();
+  @Get('/day/:date')
+  findAllDay(@Param('date') date?: string) {
+    return this.appointmentsService.findAllDay(date);
+  }
+
+  @Get('/week')
+  findAllWeek() {
+    return this.appointmentsService.findAllWeek();
+  }
+
+  @Get('/month')
+  findAllMonth() {
+    return this.appointmentsService.findAllMonth();
   }
 
   @Get('/:id')

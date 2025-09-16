@@ -38,7 +38,7 @@ export class HabitsService {
   async softDelete(id: number) {
     return this.prisma.habits.update({
       where: { Id: id, status: true },
-      data: { status: false },
+      data: { status: false, updateDate: new Date() },
     });
   }
 }

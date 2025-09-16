@@ -3,9 +3,10 @@ export class CreatePatientDto {
   paternalSurname?: string;
   maternalSurname?: string;
   gender: string;
-  phoneNumber?: string;
-  placeOfBirth: string;
-  birthdate: Date;
+  cellphoneNumber?: string;
+  telephoneNumber?: string;
+  placeOfBirth?: string;
+  birthdate?: Date;
   occupation?: string;
   address?: string;
   AppUser_Id: number;
