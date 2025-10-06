@@ -10,6 +10,7 @@ import { AppointmentRequestsModule } from './appointment-requests/appointment-re
 import { ImagesModule } from './images/images.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { GatewayModule } from './websocket/websocket.module';
 import { join } from 'path';
 
 @Module({
@@ -30,6 +31,7 @@ import { join } from 'path';
     AppointmentsModule,
     AppointmentRequestsModule,
     ImagesModule,
+    GatewayModule,
   ],
 })
 export class AppModule {}
