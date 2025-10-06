@@ -80,8 +80,8 @@ model appuser {
 
 model complementaryimage {
   Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  fileName     String    @db.VarChar(45)
-  filePath     String    @db.VarChar(45)
+  fileName     String    @db.VarChar(100)
+  filePath     String    @db.VarChar(250)
   captureDate  DateTime? @db.DateTime(0)
   description  String?   @db.VarChar(500)
   Patient_Id   Int       @db.UnsignedMediumInt
