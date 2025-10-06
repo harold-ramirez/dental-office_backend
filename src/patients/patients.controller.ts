@@ -17,6 +17,11 @@ export class PatientsController {
     return this.patientsService.findOne(+id);
   }
 
+  @Get('/search/:name')
+  searchByName(@Param('name') name: string) {
+    return this.patientsService.searchByName(name);
+  }
+
   @Post()
   create(@Body() createPatientDto: CreatePatientDto) {
     return this.patientsService.create(createPatientDto);

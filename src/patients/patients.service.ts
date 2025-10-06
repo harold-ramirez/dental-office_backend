@@ -60,6 +60,28 @@ export class PatientsService {
     });
   }
 
+  async searchByName(name: string) {
+    const words = name.trim().split(/\s+/);
+    return this.prisma.patient.findMany({
+      where: {
+        status: true,
+        AND: words.map((word) => ({
+          OR: [
+            { name: { contains: word } },
+            { paternalSurname: { contains: word } },
+            { maternalSurname: { contains: word } },
+          ],
+        })),
+      },
+      select: {
+        Id: true,
+        name: true,
+        paternalSurname: true,
+        maternalSurname: true,
+      },
+    });
+  }
+
   async create(createPatientDto: CreatePatientDto) {
     return this.prisma.patient.create({
       data: createPatientDto,
