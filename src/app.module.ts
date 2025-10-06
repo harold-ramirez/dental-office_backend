@@ -7,9 +7,20 @@ import { PatientsModule } from './patients/patients.module';
 import { HabitsModule } from './habits/habits.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentRequestsModule } from './appointment-requests/appointment-requests.module';
+import { ImagesModule } from './images/images.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    MulterModule.register({
+      dest: './uploads',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     TreatmentsModule,
     UsersModule,
     ShiftsModule,
@@ -18,6 +29,7 @@ import { AppointmentRequestsModule } from './appointment-requests/appointment-re
     HabitsModule,
     AppointmentsModule,
     AppointmentRequestsModule,
+    ImagesModule,
   ],
 })
 export class AppModule {}
