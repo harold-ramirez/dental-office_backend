@@ -12,6 +12,11 @@ export class PatientsController {
     return this.patientsService.findAll();
   }
 
+  @Get('/names')
+  findAllNames() {
+    return this.patientsService.getPatientsNames();
+  }
+
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.patientsService.findOne(+id);

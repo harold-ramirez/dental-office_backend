@@ -24,6 +24,33 @@ export class PatientsService {
     });
   }
 
+  async getPatientsNames() {
+    const patients = await this.prisma.patient.findMany({
+      where: { status: true },
+      orderBy: { name: 'desc' },
+      select: {
+        Id: true,
+        name: true,
+        paternalSurname: true,
+        maternalSurname: true,
+      },
+    });
+    const patientsList: { fullName: string; id: number }[] = [];
+    for (const patient of patients) {
+      patientsList.push({
+        id: patient.Id,
+        fullName: [
+          patient.name,
+          patient.paternalSurname,
+          patient.maternalSurname,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      });
+    }
+    return patientsList;
+  }
+
   async findOne(id: number) {
     return this.prisma.patient.findUnique({
       where: { Id: id, status: true },

@@ -23,6 +23,11 @@ export class AppointmentRequestsController {
     return this.appointmentRequestsService.findOne(+id);
   }
 
+  @Post('/')
+  create(@Body() createAppointmentRequestDto: CreateAppointmentRequestDto) {
+    return this.appointmentRequestsService.create(createAppointmentRequestDto);
+  }
+
   @Patch('/:id/:userId')
   markAsRead(@Param('id') id: string, @Param('userId') userId: string) {
     return this.appointmentRequestsService.markAsRead(+id, +userId);

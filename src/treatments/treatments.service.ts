@@ -10,6 +10,10 @@ export class TreatmentsService {
   async findAll() {
     return this.prisma.treatment.findMany({
       where: { status: true },
+      select: {
+        Id: true,
+        name: true,
+      },
     });
   }
 

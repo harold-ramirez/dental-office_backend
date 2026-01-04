@@ -32,9 +32,10 @@ export class WebsocketGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: CreateAppointmentRequestDto,
   ) {
-    await this.prisma.appointmentrequest.create({
+    const created = await this.prisma.appointmentrequest.create({
       data: data,
     });
     client.broadcast.emit('onNewRequest', data);
+    return created;
   }
 }

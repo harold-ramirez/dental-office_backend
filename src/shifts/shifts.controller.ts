@@ -13,7 +13,7 @@ export class ShiftsController {
   }
 
   @Post()
-  create(@Body() shift: CreateShiftDto) {
+  create(@Body() shift: CreateShiftDto[]) {
     return this.shiftsService.create(shift);
   }
 

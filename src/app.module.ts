@@ -12,6 +12,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { GatewayModule } from './websocket/websocket.module';
 import { join } from 'path';
+import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-procedure.module';
+import { PaymentsModule } from './payments/payments.module';
+import { MedicalHistoryModule } from './medical-history/medical-history.module';
 
 @Module({
   imports: [
@@ -32,6 +35,10 @@ import { join } from 'path';
     AppointmentRequestsModule,
     ImagesModule,
     GatewayModule,
+    DiagnosedProcedureModule,
+    PaymentsModule,
+    MedicalHistoryModule,
   ],
+  providers: [],
 })
 export class AppModule {}

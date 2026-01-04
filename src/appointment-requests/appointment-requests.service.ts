@@ -13,7 +13,7 @@ export class AppointmentRequestsService {
   async findAll() {
     return this.prisma.appointmentrequest.findMany({
       where: { status: true },
-      orderBy: { registerDate: 'asc' },
+      orderBy: { registerDate: 'desc' },
       select: {
         Id: true,
         patientFullName: true,
@@ -74,6 +74,12 @@ export class AppointmentRequestsService {
         status: true,
         updateDate: true,
       },
+    });
+  }
+
+  async create(request: CreateAppointmentRequestDto) {
+    return this.prisma.appointmentrequest.create({
+      data: request,
     });
   }
 
