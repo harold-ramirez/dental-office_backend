@@ -10,6 +10,11 @@ export class HabitsService {
   async findAll() {
     return this.prisma.habits.findMany({
       where: { status: true },
+      orderBy: { name: 'asc' },
+      select:{
+        Id: true,
+        name: true,
+      }
     });
   }
 

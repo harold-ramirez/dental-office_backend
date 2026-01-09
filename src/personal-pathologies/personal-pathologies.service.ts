@@ -10,6 +10,11 @@ export class PersonalPathologiesService {
   async findAll() {
     return this.prisma.personalpathologicalhistory.findMany({
       where: { status: true },
+      orderBy: { name: 'asc' },
+      select: {
+        Id: true,
+        name: true,
+      },
     });
   }
 

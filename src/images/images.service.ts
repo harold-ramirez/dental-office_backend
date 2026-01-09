@@ -18,7 +18,6 @@ export class ImagesService {
       select: {
         Id: true,
         fileName: true,
-        filePath: true,
         captureDate: true,
         description: true,
         registerDate: true,
@@ -41,7 +40,6 @@ export class ImagesService {
       const imageDto = {
         Id: img.Id,
         filename: img.fileName,
-        filepath: img.filePath,
         captureDate: img.captureDate,
         description: img.description,
         registerDate: img.registerDate,
@@ -58,7 +56,6 @@ export class ImagesService {
     const img = await this.prisma.complementaryimage.create({
       data: {
         fileName: image.filename,
-        filePath: `http://${apiUrl}:3000/uploads/${image.filename}`,
         captureDate: createImageDto.captureDate,
         description: createImageDto.description,
         Patient_Id: +createImageDto.Patient_Id,

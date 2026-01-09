@@ -54,6 +54,7 @@ model appuser {
   maternalSurname             String?                       @db.VarChar(45)
   gender                      String                        @db.Char(1)
   phoneNumber                 String                        @db.VarChar(15)
+  defaultMessage              String?                       @db.VarChar(200)
   AppUser_Id                  Int                           @db.UnsignedTinyInt
   registerDate                DateTime                      @default(now()) @db.Timestamp(0)
   updateDate                  DateTime?                     @db.Timestamp(0)
@@ -81,7 +82,6 @@ model appuser {
 model complementaryimage {
   Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
   fileName     String    @db.VarChar(100)
-  filePath     String    @db.VarChar(250)
   captureDate  DateTime? @db.DateTime(0)
   description  String?   @db.VarChar(500)
   Patient_Id   Int       @db.UnsignedMediumInt
@@ -144,8 +144,9 @@ model habits {
 
 model medicalhistoryform {
   Id                                             Int                                              @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
+  familyPathologicalHistory                      String?                                          @db.VarChar(150)
   allergies                                      String?                                          @db.VarChar(45)
-  pregnantMonths                                 Int?                                             @db.TinyInt
+  pregnantMonths                                 String?                                          @db.VarChar(150)
   medicalTreatment                               String?                                          @db.VarChar(45)
   takingMedicine                                 String?                                          @db.VarChar(45)
   hemorrhageType                                 String?                                          @db.VarChar(45)
@@ -164,13 +165,13 @@ model medicalhistoryform {
   useDentalFloss                                 Boolean?                                         @db.Bit(1)
   useMouthWash                                   Boolean?                                         @db.Bit(1)
   toothBrushingFrequency                         String?                                          @db.VarChar(45)
-  bleedingTypeDuringToothBrushing                String?                                          @db.VarChar(45)
+  hasBleedOnToothBrushing                        Boolean?                                         @db.Bit(1)
   oralHygiene                                    String?                                          @db.VarChar(45)
   Patient_Id                                     Int                                              @db.UnsignedMediumInt
   AppUser_Id                                     Int                                              @db.UnsignedTinyInt
   registerDate                                   DateTime                                         @default(now()) @db.Timestamp(0)
   updateDate                                     DateTime?                                        @db.Timestamp(0)
-  status                                         Boolean?                                         @db.Bit(1)
+  status                                         Boolean?                                         @default(dbgenerated("b'1'")) @db.Bit(1)
   appuser                                        appuser                                          @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_AppUser1")
   patient                                        patient                                          @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_MedicalHistoryForm_Patient1")
   medicalhistoryform_habits                      medicalhistoryform_habits[]

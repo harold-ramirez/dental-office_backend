@@ -7,6 +7,20 @@ import { PrismaService } from 'src/prisma.service';
 export class AppointmentsService {
   constructor(private prisma: PrismaService) {}
 
+  async summary() {
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    return await this.prisma.appointment.count({
+      where: {
+        status: true,
+        dateHour: { gte: startOfDay, lte: endOfDay },
+      },
+    });
+  }
+
   async findAllDay(date?: string) {
     if (!date) {
       date = new Date().toISOString().split('T')[0];
@@ -34,7 +48,7 @@ export class AppointmentsService {
             maternalSurname: true,
           },
         },
-        minutesDuration: true,        
+        minutesDuration: true,
       },
     });
   }
@@ -118,26 +132,26 @@ export class AppointmentsService {
       select: {
         Id: true,
         dateHour: true,
-        diagnosedprocedure:{
-          select:{
+        diagnosedprocedure: {
+          select: {
             Id: true,
             description: true,
-            treatment:{
-              select:{
+            treatment: {
+              select: {
                 Id: true,
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
-        appointmentrequest:{
-          select:{
+        appointmentrequest: {
+          select: {
             Id: true,
             dateHourRequest: true,
             message: true,
             registerDate: true,
             status: true,
-          }
+          },
         },
         patient: {
           select: {
@@ -149,11 +163,11 @@ export class AppointmentsService {
           },
         },
         minutesDuration: true,
-        appuser:{
-          select:{
+        appuser: {
+          select: {
             Id: true,
             username: true,
-          }
+          },
         },
         registerDate: true,
         updateDate: true,

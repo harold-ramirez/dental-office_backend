@@ -7,6 +7,11 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
   
+  @Get('/summary')
+  summary() {
+    return this.appointmentsService.summary();
+  }
+  
   @Get('/day/:date')
   findAllDay(@Param('date') date?: string) {
     return this.appointmentsService.findAllDay(date);

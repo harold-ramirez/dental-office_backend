@@ -70,7 +70,6 @@ export class PatientsService {
           select: {
             Id: true,
             fileName: true,
-            filePath: true,
             captureDate: true,
             description: true,
           },
