@@ -169,6 +169,65 @@ export class MedicalHistoryService {
           });
         }),
       );
+      const patient = await tx.patient.findUnique({
+        where: { Id: createdMedicalHistory.Patient_Id },
+      });
+      const age = patient?.birthdate
+        ? new Date().getFullYear() - new Date(patient.birthdate).getFullYear()
+        : 0;
+      const odontogram = await tx.odontogram.create({
+        data: {
+          Id: createdMedicalHistory.Id,
+          model: age <= 15 ? 'child' : 'adult',
+          AppUser_Id: createdMedicalHistory.AppUser_Id,
+        },
+      });
+
+      const isAdult: boolean = odontogram.model === 'adult';
+
+      // Teeth
+      const minTeethNumber = isAdult ? 1 : 5;
+      const maxTeethNumber = isAdult ? 8 : 5;
+      const teethToCreate: any[] = [];
+      for (let i = minTeethNumber; i <= minTeethNumber + 3; i++) {
+        for (let j = 1; j <= maxTeethNumber; j++) {
+          teethToCreate.push({
+            pieceNumber: i * 10 + j,
+            Odontogram_Id: odontogram.Id,
+            AppUser_Id: odontogram.AppUser_Id,
+          });
+        }
+      }
+      const createdTeeth = await Promise.all(
+        teethToCreate.map((tooth) => tx.tooth.create({ data: tooth })),
+      );
+
+      // Tooth Sections
+      const piecesPerTooth = isAdult
+        ? [5, 5, 5, 6, 6, 8, 8, 8]
+        : [5, 5, 5, 8, 8];
+
+      const teethPerQuadrant = isAdult ? 8 : 5;
+      const quadrants = 4;
+
+      await Promise.all(
+        Array.from({ length: quadrants }).flatMap((_, quadrantIndex) =>
+          createdTeeth
+            .slice(
+              quadrantIndex * teethPerQuadrant,
+              (quadrantIndex + 1) * teethPerQuadrant,
+            )
+            .flatMap((tooth, toothIndex) =>
+              Array.from({ length: piecesPerTooth[toothIndex] }).map(() =>
+                tx.toothsection.create({
+                  data: {
+                    Tooth_Id: tooth.Id,
+                  },
+                }),
+              ),
+            ),
+        ),
+      );
 
       return {
         registeredPathologies,

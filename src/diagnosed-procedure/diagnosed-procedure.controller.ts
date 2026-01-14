@@ -17,6 +17,11 @@ export class DiagnosedProcedureController {
     private readonly diagnosedProcedureService: DiagnosedProcedureService,
   ) {}
 
+@Get(':patientId/preview')
+  preview(@Param('patientId') patientId: string) {
+    return this.diagnosedProcedureService.preview(+patientId);
+  }
+
   @Get(':patientId')
   findAll(@Param('patientId') patientId: string) {
     return this.diagnosedProcedureService.findAll(+patientId);

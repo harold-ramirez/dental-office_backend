@@ -15,6 +15,7 @@ import { join } from 'path';
 import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-procedure.module';
 import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
+import { OdontogramModule } from './odontogram/odontogram.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MedicalHistoryModule } from './medical-history/medical-history.module';
     DiagnosedProcedureModule,
     PaymentsModule,
     MedicalHistoryModule,
+    OdontogramModule,
   ],
   providers: [],
 })

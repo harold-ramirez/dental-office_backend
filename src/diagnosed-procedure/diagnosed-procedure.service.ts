@@ -7,13 +7,74 @@ import { PrismaService } from 'src/prisma.service';
 export class DiagnosedProcedureService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(patientId: number) {
+  async preview(patientId: number) {
     return await this.prisma.diagnosedprocedure.findMany({
       where: {
         Patient_Id: patientId,
         status: true,
       },
+      orderBy: { registerDate: 'desc' },
+      select: {
+        Id: true,
+        registerDate: true,
+        treatment: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
+  }
+
+  async findAll(patientId: number) {
+    const data = await this.prisma.diagnosedprocedure.findMany({
+      orderBy: { registerDate: 'desc' },
+      where: {
+        Patient_Id: patientId,
+        status: true,
+      },
+      select: {
+        Id: true,
+        description: true,
+        totalCost: true,
+        treatment: {
+          select: {
+            Id: true,
+            name: true,
+            description: true,
+          },
+        },
+        registerDate: true,
+        updateDate: true,
+        diagnosedprocedure_tooth: {
+          select: {
+            tooth: {
+              select: {
+                Id: true,
+                pieceNumber: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const diagnosedProcedureDto: any[] = [];
+    data.map((item) => {
+      diagnosedProcedureDto.push({
+        Id: item.Id,
+        description: item.description,
+        totalCost: item.totalCost,
+        Treatment: {
+          Id: item.treatment.Id,
+          name: item.treatment.name,
+          description: item.treatment.description,
+        },
+        totalPieces: item.diagnosedprocedure_tooth.length,
+        registerDate: item.registerDate,
+        updateDate: item.updateDate,
+      });
+    });
+    return diagnosedProcedureDto;
   }
 
   async findOne(id: number) {
@@ -22,9 +83,34 @@ export class DiagnosedProcedureService {
     });
   }
 
-  async create(createDiagnosedProcedureDto: CreateDiagnosedProcedureDto) {
-    return await this.prisma.diagnosedprocedure.create({
-      data: createDiagnosedProcedureDto,
+  async create(body: CreateDiagnosedProcedureDto) {
+    return await this.prisma.$transaction(async (tx) => {
+      const createdProcedure = await tx.diagnosedprocedure.create({
+        data: {
+          description: body.description,
+          totalCost: body.totalCost,
+          Patient_Id: body.Patient_Id,
+          Treatment_Id: body.Treatment_Id,
+          AppUser_Id: body.AppUser_Id,
+        },
+      });
+
+      const uniqueToothIds = Array.from(new Set(body.dentalPieces ?? []));
+      const links = await Promise.all(
+        uniqueToothIds.map((toothId) =>
+          tx.diagnosedprocedure_tooth.create({
+            data: {
+              DiagnosedProcedure_Id: createdProcedure.Id,
+              Tooth_Id: toothId,
+            },
+          }),
+        ),
+      );
+
+      return {
+        ...createdProcedure,
+        totalPieces: links.length,
+      };
     });
   }
 

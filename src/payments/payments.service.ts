@@ -8,12 +8,61 @@ export class PaymentsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(diagnosedProcedureId: number) {
-    return await this.prisma.payment.findMany({
+    const procedure = await this.prisma.diagnosedprocedure.findUnique({
+      where: { Id: diagnosedProcedureId, status: true },
+      select: {
+        description: true,
+        totalCost: true,
+        treatment: {
+          select: {
+            name: true,
+          },
+        },
+        registerDate: true,
+        diagnosedprocedure_tooth: {
+          select: {
+            tooth: {
+              select: {
+                pieceNumber: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const payments = await this.prisma.payment.findMany({
       where: {
         DiagnosedProcedure_Id: diagnosedProcedureId,
         status: true,
       },
+      orderBy: { registerDate: 'asc' },
+      select:{
+        Id: true,
+        amount: true,
+        registerDate: true,
+      }
     });
+    if (!procedure) return;
+
+    const totalPaid = payments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
+    const dto = {
+      totalPaid: totalPaid,
+      totalDue: (Number(procedure.totalCost) ?? 0) - totalPaid,
+      description: procedure.description,
+      totalCost: Number(procedure.totalCost),
+      treatment: procedure.treatment.name,
+      registerDate: procedure.registerDate,
+      totalPieces: procedure.diagnosedprocedure_tooth.map(
+        (item) => item.tooth.pieceNumber,
+      ),
+      payments,
+    };
+    return {
+      ...dto,
+    };
   }
 
   async findOne(Id: number) {

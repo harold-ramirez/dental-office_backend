@@ -73,7 +73,6 @@ model appuser {
   personalpathologicalhistory personalpathologicalhistory[]
   shift                       shift[]
   tooth                       tooth[]
-  toothsection                toothsection[]
   treatment                   treatment[]
 
   @@index([AppUser_Id], map: "fk_AppUser_AppUser1_idx")
@@ -287,9 +286,8 @@ model shift {
 
 model tooth {
   Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  name                     String?                    @db.VarChar(45)
   pieceNumber              Int?                       @db.TinyInt
-  localStatus              String?                    @db.VarChar(45)
+  localStatus              String?                    @default("white") @db.VarChar(45)
   Odontogram_Id            Int                        @db.UnsignedMediumInt
   AppUser_Id               Int                        @db.UnsignedTinyInt
   registerDate             DateTime                   @default(now()) @db.Timestamp(0)
@@ -304,16 +302,11 @@ model tooth {
 }
 
 model toothsection {
-  Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  localStatus  String?   @db.VarChar(45)
-  Tooth_Id     Int       @db.UnsignedInt
-  AppUser_Id   Int       @db.UnsignedTinyInt
-  registerDate DateTime  @default(now()) @db.Timestamp(0)
-  updateDate   DateTime? @db.Timestamp(0)
-  appuser      appuser   @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ToothSection_AppUser1")
-  tooth        tooth     @relation(fields: [Tooth_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ToothSection_Tooth1")
+  Id          Int     @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  localStatus String? @default("white") @db.VarChar(45)
+  Tooth_Id    Int     @db.UnsignedInt
+  tooth       tooth   @relation(fields: [Tooth_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ToothSection_Tooth1")
 
-  @@index([AppUser_Id], map: "fk_ToothSection_AppUser1_idx")
   @@index([Tooth_Id], map: "fk_ToothSection_Tooth1_idx")
 }
 
