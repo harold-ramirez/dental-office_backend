@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -6,12 +14,22 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 @Controller('appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
-  
+
   @Get('/summary')
   summary() {
     return this.appointmentsService.summary();
   }
-  
+
+@Get('preview/:patientId')
+  preview(@Param('patientId') patientId: number) {
+    return this.appointmentsService.preview(+patientId);
+  }
+
+  @Get('history/:patientId')
+  history(@Param('patientId') patientId: number) {
+    return this.appointmentsService.history(+patientId);
+  }
+
   @Get('/day/:date')
   findAllDay(@Param('date') date?: string) {
     return this.appointmentsService.findAllDay(date);
@@ -38,7 +56,10 @@ export class AppointmentsController {
   }
 
   @Patch('/:id')
-  update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAppointmentDto: UpdateAppointmentDto,
+  ) {
     return this.appointmentsService.update(+id, updateAppointmentDto);
   }
 

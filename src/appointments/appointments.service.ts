@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import {
+  CreateAppointmentDto,
+  AppointmentHistoryDto,
+} from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -19,6 +22,137 @@ export class AppointmentsService {
         dateHour: { gte: startOfDay, lte: endOfDay },
       },
     });
+  }
+
+  async preview(patientId: number) {
+    const dbPreview = await this.prisma.appointment.findMany({
+      take: 5,
+      orderBy: { dateHour: 'desc' },
+      where: { Patient_Id: patientId, status: true },
+      select: {
+        dateHour: true,
+        diagnosedprocedure: {
+          select: {
+            treatment: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const preview: { dateHour: Date; treatment: string | null }[] =
+      dbPreview.map((appointment) => {
+        return {
+          dateHour: appointment.dateHour,
+          treatment: appointment.diagnosedprocedure?.treatment.name ?? null,
+        };
+      });
+    return preview;
+  }
+
+  async history(patientId: number) {
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfCurrentMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+    const startOfLastMonth = new Date(
+      lastMonthDate.getFullYear(),
+      lastMonthDate.getMonth(),
+      1,
+    );
+    const endOfLastMonth = new Date(
+      lastMonthDate.getFullYear(),
+      lastMonthDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const mapAppointmentToDto = (appointment) => ({
+      dateHour: appointment.dateHour,
+      minutesDuration: appointment.minutesDuration,
+      requestMessage: appointment.appointmentrequest?.message ?? null,
+      treatment: appointment.diagnosedprocedure?.treatment.name ?? null,
+    });
+
+    const appointmentSelect = {
+      dateHour: true,
+      minutesDuration: true,
+      appointmentrequest: {
+        select: {
+          message: true,
+        },
+      },
+      diagnosedprocedure: {
+        select: {
+          treatment: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    };
+
+    const [last10, currentMonth, lastMonth, all] = await Promise.all([
+      this.prisma.appointment.findMany({
+        take: 10,
+        orderBy: { dateHour: 'desc' },
+        select: appointmentSelect,
+        where: { Patient_Id: patientId, status: true },
+      }),
+      this.prisma.appointment.findMany({
+        orderBy: { dateHour: 'desc' },
+        select: appointmentSelect,
+        where: {
+          Patient_Id: patientId,
+          status: true,
+          dateHour: {
+            gte: startOfCurrentMonth,
+            lte: endOfCurrentMonth,
+          },
+        },
+      }),
+      this.prisma.appointment.findMany({
+        orderBy: { dateHour: 'desc' },
+        select: appointmentSelect,
+        where: {
+          Patient_Id: patientId,
+          status: true,
+          dateHour: {
+            gte: startOfLastMonth,
+            lte: endOfLastMonth,
+          },
+        },
+      }),
+      this.prisma.appointment.findMany({
+        orderBy: { dateHour: 'desc' },
+        select: appointmentSelect,
+        where: {
+          Patient_Id: patientId,
+          status: true,
+        },
+      }),
+    ]);
+
+    return {
+      last10Appointments: last10.map(mapAppointmentToDto),
+      currentMonthAppointments: currentMonth.map(mapAppointmentToDto),
+      lastMonthAppointments: lastMonth.map(mapAppointmentToDto),
+      allAppointments: all.map(mapAppointmentToDto),
+    };
   }
 
   async findAllDay(date?: string) {

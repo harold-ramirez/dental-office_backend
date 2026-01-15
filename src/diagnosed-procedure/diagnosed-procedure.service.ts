@@ -9,11 +9,9 @@ export class DiagnosedProcedureService {
 
   async preview(patientId: number) {
     return await this.prisma.diagnosedprocedure.findMany({
-      where: {
-        Patient_Id: patientId,
-        status: true,
-      },
+      take: 5,
       orderBy: { registerDate: 'desc' },
+      where: { Patient_Id: patientId, status: true },
       select: {
         Id: true,
         registerDate: true,

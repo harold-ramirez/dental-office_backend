@@ -6,3 +6,10 @@ export class CreateAppointmentDto {
   minutesDuration: number;
   AppUser_Id: number;
 }
+
+export interface AppointmentHistoryDto {
+  dateHour: Date;
+  minutesDuration: number;
+  requestMessage: string | null;
+  treatment: string | null;
+}
