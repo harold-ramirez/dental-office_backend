@@ -12,16 +12,81 @@ export class AppointmentsService {
 
   async summary() {
     const now = new Date();
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-    return await this.prisma.appointment.count({
-      where: {
-        status: true,
-        dateHour: { gte: startOfDay, lte: endOfDay },
-      },
+    // Today
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+    // Tomorrow
+    const startOfTomorrow = new Date(now);
+    startOfTomorrow.setDate(now.getDate() + 1);
+    startOfTomorrow.setHours(0, 0, 0, 0);
+    const endOfTomorrow = new Date(startOfTomorrow);
+    endOfTomorrow.setHours(23, 59, 59, 999);
+    // Current Week
+    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - dayOfWeek);
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const [
+      todayCount,
+      tomorrowCount,
+      weekCount,
+      weekAppointments,
+      pendingRequests,
+    ] = await Promise.all([
+      this.prisma.appointment.count({
+        where: {
+          status: true,
+          dateHour: { gte: startOfToday, lte: endOfToday },
+        },
+      }),
+      this.prisma.appointment.count({
+        where: {
+          status: true,
+          dateHour: { gte: startOfTomorrow, lte: endOfTomorrow },
+        },
+      }),
+      this.prisma.appointment.count({
+        where: {
+          status: true,
+          dateHour: { gte: monday, lte: sunday },
+        },
+      }),
+      this.prisma.appointment.findMany({
+        where: {
+          status: true,
+          dateHour: { gte: monday, lte: sunday },
+        },
+        select: {
+          dateHour: true,
+        },
+      }),
+      this.prisma.appointmentrequest.count({
+        where: {
+          status: true,
+        },
+      }),
+    ]);
+
+    const daysCountArray = [0, 0, 0, 0, 0, 0, 0]; // [Sunday, Monday, ..., Saturday]
+
+    weekAppointments.forEach((appointment) => {
+      const dayIndex = appointment.dateHour.getDay();
+      daysCountArray[dayIndex]++;
     });
+
+    return {
+      today: todayCount,
+      tomorrow: tomorrowCount,
+      currentWeek: weekCount,
+      currentWeekByDay: daysCountArray,
+      pendingRequests: pendingRequests,
+    };
   }
 
   async preview(patientId: number) {

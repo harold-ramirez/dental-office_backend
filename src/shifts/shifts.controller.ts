@@ -17,8 +17,8 @@ export class ShiftsController {
     return this.shiftsService.create(shift);
   }
 
-  @Patch('/:id')
-  update(@Param('id') id: string, @Body() shift: UpdateShiftDto) {
-    return this.shiftsService.update(+id, shift);
+  @Patch()
+  update(@Body() body: UpdateShiftDto[]) {
+    return this.shiftsService.update(body);
   }
 }

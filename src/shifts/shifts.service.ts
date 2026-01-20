@@ -16,21 +16,28 @@ export class ShiftsService {
         status: true,
       },
     });
-    const res: {
-      Id: number;
-      day: string;
-      hour: string;
-      status: boolean;
-    }[] = [];
 
-    data.map((shift) => {
+    const groupedByDay = {
+      Monday: [] as { Id: number; hour: string; status: boolean }[],
+      Tuesday: [] as { Id: number; hour: string; status: boolean }[],
+      Wednesday: [] as { Id: number; hour: string; status: boolean }[],
+      Thursday: [] as { Id: number; hour: string; status: boolean }[],
+      Friday: [] as { Id: number; hour: string; status: boolean }[],
+      Saturday: [] as { Id: number; hour: string; status: boolean }[],
+      Sunday: [] as { Id: number; hour: string; status: boolean }[],
+    };
+
+    data.forEach((shift) => {
       let dbHour = shift.hour.toISOString();
       dbHour = dbHour.split('T')[1];
       dbHour = dbHour.split('.')[0];
       dbHour = dbHour.slice(0, -3);
-      res.push({ ...shift, hour: dbHour });
+
+      const shiftData = { Id: shift.Id, hour: dbHour, status: shift.status };
+      groupedByDay[shift.day]?.push(shiftData);
     });
-    return res;
+
+    return groupedByDay;
   }
 
   async create(createShiftDto: CreateShiftDto[]) {
@@ -41,13 +48,19 @@ export class ShiftsService {
     return res;
   }
 
-  async update(id: number, updateShiftDto: UpdateShiftDto) {
-    return this.prisma.shift.update({
-      where: { Id: id },
-      data: {
-        ...updateShiftDto,
-        updateDate: new Date(),
-      },
-    });
+  async update(body: UpdateShiftDto[]) {
+    const res = await this.prisma.$transaction(
+      body.map((dto) =>
+        this.prisma.shift.update({
+          where: { Id: dto.Id },
+          data: {
+            status: dto.status,
+            AppUser_Id: dto.AppUser_Id,
+            updateDate: new Date(),
+          },
+        }),
+      ),
+    );
+    return res;
   }
 }

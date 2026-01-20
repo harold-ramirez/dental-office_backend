@@ -36,11 +36,11 @@ export class PaymentsService {
         status: true,
       },
       orderBy: { registerDate: 'asc' },
-      select:{
+      select: {
         Id: true,
         amount: true,
         registerDate: true,
-      }
+      },
     });
     if (!procedure) return;
 
@@ -72,8 +72,26 @@ export class PaymentsService {
   }
 
   async create(createPaymentDto: CreatePaymentDto) {
-    return await this.prisma.payment.create({
-      data: createPaymentDto,
+    await this.prisma.$transaction(async (tx) => {
+      await tx.payment.create({ data: createPaymentDto });
+
+      const { _sum } = await tx.payment.aggregate({
+        where: {
+          DiagnosedProcedure_Id: createPaymentDto.DiagnosedProcedure_Id,
+          status: true,
+        },
+        _sum: { amount: true },
+      });
+      const procedure = await tx.diagnosedprocedure.findUnique({
+        where: { Id: createPaymentDto.DiagnosedProcedure_Id, status: true },
+        select: { totalCost: true },
+      });
+      if (Number(_sum.amount ?? 0) >= Number(procedure?.totalCost ?? 0)) {
+        await tx.diagnosedprocedure.update({
+          where: { Id: createPaymentDto.DiagnosedProcedure_Id, status: true },
+          data: { updateDate: new Date() },
+        });
+      }
     });
   }
 
