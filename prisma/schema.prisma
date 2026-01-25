@@ -11,7 +11,7 @@ model appointment {
   Id                    Int                 @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
   dateHour              DateTime            @db.DateTime(0)
   AppointmentRequest_Id Int?                @db.UnsignedMediumInt
-  DiagnosedProcedure_Id Int?                @db.UnsignedInt
+  Treatment_Id          Int?                @db.UnsignedTinyInt
   Patient_Id            Int                 @db.UnsignedMediumInt
   minutesDuration       Int                 @db.TinyInt
   AppUser_Id            Int                 @db.UnsignedTinyInt
@@ -20,13 +20,13 @@ model appointment {
   status                Boolean             @default(dbgenerated("b'1'")) @db.Bit(1)
   appuser               appuser             @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppUser1")
   appointmentrequest    appointmentrequest? @relation(fields: [AppointmentRequest_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppointmentRequest1")
-  diagnosedprocedure    diagnosedprocedure? @relation(fields: [DiagnosedProcedure_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_DiagnosedProcedure1")
   patient               patient             @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Patient1")
+  treatment             treatment?          @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Treatment1")
 
   @@index([AppUser_Id], map: "fk_Appointment_AppUser1_idx")
   @@index([AppointmentRequest_Id], map: "fk_Appointment_AppointmentRequest1_idx")
-  @@index([DiagnosedProcedure_Id], map: "fk_Appointment_DiagnosedProcedure1_idx")
   @@index([Patient_Id], map: "fk_Appointment_Patient1_idx")
+  @@index([Treatment_Id], map: "fk_Appointment_Treatment1_idx")
 }
 
 model appointmentrequest {
@@ -105,7 +105,6 @@ model diagnosedprocedure {
   registerDate             DateTime                   @default(now()) @db.Timestamp(0)
   updateDate               DateTime?                  @db.Timestamp(0)
   status                   Boolean                    @default(dbgenerated("b'1'")) @db.Bit(1)
-  appointment              appointment[]
   appuser                  appuser                    @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_AppUser1")
   patient                  patient                    @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Patient1")
   treatment                treatment                  @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Treatment1")
@@ -318,6 +317,7 @@ model treatment {
   updateDate         DateTime?            @db.Timestamp(0)
   status             Boolean              @default(dbgenerated("b'1'")) @db.Bit(1)
   AppUser_Id         Int                  @db.UnsignedTinyInt
+  appointment        appointment[]
   diagnosedprocedure diagnosedprocedure[]
   appuser            appuser              @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Treatment_AppUser1")
 

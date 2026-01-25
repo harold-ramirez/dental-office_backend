@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CreateAppointmentDto,
   AppointmentHistoryDto,
+  WeekScheduleDto,
 } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -96,13 +97,9 @@ export class AppointmentsService {
       where: { Patient_Id: patientId, status: true },
       select: {
         dateHour: true,
-        diagnosedprocedure: {
+        treatment: {
           select: {
-            treatment: {
-              select: {
-                name: true,
-              },
-            },
+            name: true,
           },
         },
       },
@@ -111,7 +108,7 @@ export class AppointmentsService {
       dbPreview.map((appointment) => {
         return {
           dateHour: appointment.dateHour,
-          treatment: appointment.diagnosedprocedure?.treatment.name ?? null,
+          treatment: appointment.treatment?.name ?? null,
         };
       });
     return preview;
@@ -149,7 +146,7 @@ export class AppointmentsService {
       dateHour: appointment.dateHour,
       minutesDuration: appointment.minutesDuration,
       requestMessage: appointment.appointmentrequest?.message ?? null,
-      treatment: appointment.diagnosedprocedure?.treatment.name ?? null,
+      treatment: appointment.treatment?.name ?? null,
     });
 
     const appointmentSelect = {
@@ -160,13 +157,9 @@ export class AppointmentsService {
           message: true,
         },
       },
-      diagnosedprocedure: {
+      treatment: {
         select: {
-          treatment: {
-            select: {
-              name: true,
-            },
-          },
+          name: true,
         },
       },
     };
@@ -220,14 +213,13 @@ export class AppointmentsService {
     };
   }
 
-  async findAllDay(date?: string) {
-    if (!date) {
-      date = new Date().toISOString().split('T')[0];
-    }
-    const start = new Date(date + 'T00:00:00');
-    const end = new Date(date + 'T23:59:59.999');
+  async findAllDay(date: string) {
+    const day = date.split('T')[0];
+    const start = new Date(day + 'T00:00:00');
+    const end = new Date(day + 'T23:59:59.999');
 
-    return this.prisma.appointment.findMany({
+    const appointments = await this.prisma.appointment.findMany({
+      orderBy: { dateHour: 'asc' },
       where: {
         status: true,
         dateHour: {
@@ -238,7 +230,11 @@ export class AppointmentsService {
       select: {
         Id: true,
         dateHour: true,
-        DiagnosedProcedure_Id: true,
+        treatment: {
+          select: {
+            name: true,
+          },
+        },
         patient: {
           select: {
             Id: true,
@@ -250,6 +246,24 @@ export class AppointmentsService {
         minutesDuration: true,
       },
     });
+    const dto: any[] = [];
+    for (const appointment of appointments) {
+      dto.push({
+        Id: appointment.Id,
+        dateHour: appointment.dateHour,
+        treatment: appointment.treatment?.name ?? null,
+        patientID: appointment.patient.Id,
+        minutesDuration: appointment.minutesDuration,
+        patient: [
+          appointment.patient.name,
+          appointment.patient.paternalSurname,
+          appointment.patient.maternalSurname,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      });
+    }
+    return dto;
   }
 
   async findAllWeek() {
@@ -263,7 +277,8 @@ export class AppointmentsService {
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
-    return this.prisma.appointment.findMany({
+    const data = await this.prisma.appointment.findMany({
+      orderBy: { dateHour: 'asc' },
       where: {
         status: true,
         dateHour: {
@@ -285,6 +300,60 @@ export class AppointmentsService {
         minutesDuration: true,
       },
     });
+
+    // Inicializar objeto con los días de la semana
+    const weekSchedule: WeekScheduleDto = {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
+    };
+
+    // Mapear cada appointment al día correspondiente
+    data.forEach((appointment) => {
+      const appointmentDay = appointment.dateHour.getDay();
+      const dto = {
+        Id: appointment.Id,
+        dateHour: appointment.dateHour,
+        minutesDuration: appointment.minutesDuration,
+        patient: [
+          appointment.patient.name,
+          appointment.patient.paternalSurname,
+          appointment.patient.maternalSurname,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      };
+
+      switch (appointmentDay) {
+        case 1:
+          weekSchedule.monday.push(dto);
+          break;
+        case 2:
+          weekSchedule.tuesday.push(dto);
+          break;
+        case 3:
+          weekSchedule.wednesday.push(dto);
+          break;
+        case 4:
+          weekSchedule.thursday.push(dto);
+          break;
+        case 5:
+          weekSchedule.friday.push(dto);
+          break;
+        case 6:
+          weekSchedule.saturday.push(dto);
+          break;
+        case 0:
+          weekSchedule.sunday.push(dto);
+          break;
+      }
+    });
+
+    return weekSchedule;
   }
 
   async findAllMonth() {
@@ -309,17 +378,18 @@ export class AppointmentsService {
       },
     });
 
-    // Agrupa por día (ignorando la hora)
     const result: { day: string; count: number }[] = [];
     const dayMap = new Map<string, number>();
 
     grouped.forEach((item) => {
-      const day = item.dateHour.toISOString().split('T')[0];
-      dayMap.set(day, (dayMap.get(day) || 0) + item._count.dateHour);
+      const dayStart = new Date(item.dateHour);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayIso = dayStart.toISOString();
+      dayMap.set(dayIso, (dayMap.get(dayIso) || 0) + item._count.dateHour);
     });
 
-    dayMap.forEach((count, day) => {
-      result.push({ day, count });
+    dayMap.forEach((count, dayIso) => {
+      result.push({ day: dayIso, count });
     });
 
     return result;
@@ -331,16 +401,10 @@ export class AppointmentsService {
       select: {
         Id: true,
         dateHour: true,
-        diagnosedprocedure: {
+        treatment: {
           select: {
             Id: true,
-            description: true,
-            treatment: {
-              select: {
-                Id: true,
-                name: true,
-              },
-            },
+            name: true,
           },
         },
         appointmentrequest: {

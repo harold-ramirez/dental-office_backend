@@ -20,7 +20,7 @@ export class AppointmentsController {
     return this.appointmentsService.summary();
   }
 
-@Get('preview/:patientId')
+  @Get('preview/:patientId')
   preview(@Param('patientId') patientId: number) {
     return this.appointmentsService.preview(+patientId);
   }
@@ -31,7 +31,7 @@ export class AppointmentsController {
   }
 
   @Get('/day/:date')
-  findAllDay(@Param('date') date?: string) {
+  findAllDay(@Param('date') date: string) {
     return this.appointmentsService.findAllDay(date);
   }
 

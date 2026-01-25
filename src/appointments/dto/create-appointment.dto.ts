@@ -13,3 +13,48 @@ export interface AppointmentHistoryDto {
   requestMessage: string | null;
   treatment: string | null;
 }
+
+export interface WeekScheduleDto {
+  monday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  tuesday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  wednesday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  thursday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  friday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  saturday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+  sunday: {
+    Id: number;
+    dateHour: Date;
+    patient: string;
+    minutesDuration: number;
+  }[];
+}
