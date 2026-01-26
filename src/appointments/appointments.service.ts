@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   CreateAppointmentDto,
-  AppointmentHistoryDto,
   WeekScheduleDto,
 } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -147,11 +146,13 @@ export class AppointmentsService {
       minutesDuration: appointment.minutesDuration,
       requestMessage: appointment.appointmentrequest?.message ?? null,
       treatment: appointment.treatment?.name ?? null,
+      notes: appointment.notes ?? null,
     });
 
     const appointmentSelect = {
       dateHour: true,
       minutesDuration: true,
+      notes: true,
       appointmentrequest: {
         select: {
           message: true,
@@ -230,9 +231,17 @@ export class AppointmentsService {
       select: {
         Id: true,
         dateHour: true,
+        notes: true,
+        minutesDuration: true,
         treatment: {
           select: {
             name: true,
+          },
+        },
+        appointmentrequest: {
+          select: {
+            message: true,
+            phoneNumber: true,
           },
         },
         patient: {
@@ -241,9 +250,9 @@ export class AppointmentsService {
             name: true,
             paternalSurname: true,
             maternalSurname: true,
+            cellphoneNumber: true,
           },
         },
-        minutesDuration: true,
       },
     });
     const dto: any[] = [];
@@ -254,6 +263,10 @@ export class AppointmentsService {
         treatment: appointment.treatment?.name ?? null,
         patientID: appointment.patient.Id,
         minutesDuration: appointment.minutesDuration,
+        notes: appointment.notes,
+        requestMessage: appointment.appointmentrequest?.message ?? null,
+        requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
+        patientPhoneNumber: appointment.patient.cellphoneNumber,
         patient: [
           appointment.patient.name,
           appointment.patient.paternalSurname,
@@ -289,15 +302,28 @@ export class AppointmentsService {
       select: {
         Id: true,
         dateHour: true,
+        minutesDuration: true,
+        notes: true,
+        treatment: {
+          select: {
+            name: true,
+          },
+        },
+        appointmentrequest: {
+          select: {
+            message: true,
+            phoneNumber: true,
+          },
+        },
         patient: {
           select: {
             Id: true,
             name: true,
             paternalSurname: true,
             maternalSurname: true,
+            cellphoneNumber: true,
           },
         },
-        minutesDuration: true,
       },
     });
 
@@ -319,6 +345,11 @@ export class AppointmentsService {
         Id: appointment.Id,
         dateHour: appointment.dateHour,
         minutesDuration: appointment.minutesDuration,
+        notes: appointment.notes,
+        treatment: appointment.treatment?.name ?? null,
+        requestMessage: appointment.appointmentrequest?.message ?? null,
+        requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
+        patientPhoneNumber: appointment.patient.cellphoneNumber,
         patient: [
           appointment.patient.name,
           appointment.patient.paternalSurname,

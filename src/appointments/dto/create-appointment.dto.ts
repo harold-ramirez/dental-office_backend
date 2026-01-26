@@ -7,54 +7,76 @@ export class CreateAppointmentDto {
   AppUser_Id: number;
 }
 
-export interface AppointmentHistoryDto {
-  dateHour: Date;
-  minutesDuration: number;
-  requestMessage: string | null;
-  treatment: string | null;
-}
-
 export interface WeekScheduleDto {
   monday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    treatment: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   tuesday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   wednesday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   thursday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   friday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   saturday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
   sunday: {
     Id: number;
     dateHour: Date;
     patient: string;
     minutesDuration: number;
+    notes: string | null;
+    requestMessage: string | null;
+    requestPhoneNumber: string | null;
+    patientPhoneNumber: string | null;
   }[];
 }

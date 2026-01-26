@@ -52,7 +52,6 @@ export class ImagesService {
   }
 
   async create(createImageDto: CreateImageDto, image: Express.Multer.File) {
-    const apiUrl = process.env.API_URL;
     const img = await this.prisma.complementaryimage.create({
       data: {
         fileName: image.filename,
