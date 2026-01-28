@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { DiagnosedProcedureService } from './diagnosed-procedure.service';
 import { CreateDiagnosedProcedureDto } from './dto/create-diagnosed-procedure.dto';
 import { UpdateDiagnosedProcedureDto } from './dto/update-diagnosed-procedure.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('diagnosed-procedure')
 export class DiagnosedProcedureController {
   constructor(

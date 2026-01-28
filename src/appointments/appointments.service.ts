@@ -235,6 +235,7 @@ export class AppointmentsService {
         minutesDuration: true,
         treatment: {
           select: {
+            Id: true,
             name: true,
           },
         },
@@ -261,6 +262,7 @@ export class AppointmentsService {
         Id: appointment.Id,
         dateHour: appointment.dateHour,
         treatment: appointment.treatment?.name ?? null,
+        treatmentID: appointment.treatment?.Id ?? null,
         patientID: appointment.patient.Id,
         minutesDuration: appointment.minutesDuration,
         notes: appointment.notes,
@@ -306,6 +308,7 @@ export class AppointmentsService {
         notes: true,
         treatment: {
           select: {
+            Id: true,
             name: true,
           },
         },
@@ -347,9 +350,11 @@ export class AppointmentsService {
         minutesDuration: appointment.minutesDuration,
         notes: appointment.notes,
         treatment: appointment.treatment?.name ?? null,
+        treatmentID: appointment.treatment?.Id ?? null,
         requestMessage: appointment.appointmentrequest?.message ?? null,
         requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
         patientPhoneNumber: appointment.patient.cellphoneNumber,
+        patientID: appointment.patient.Id,
         patient: [
           appointment.patient.name,
           appointment.patient.paternalSurname,

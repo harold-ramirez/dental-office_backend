@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { OdontogramService } from './odontogram.service';
 import { CreateOdontogramDto } from './dto/create-odontogram.dto';
 import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('odontogram')
 export class OdontogramController {
   constructor(private readonly odontogramService: OdontogramService) {}

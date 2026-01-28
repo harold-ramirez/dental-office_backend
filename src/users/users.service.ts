@@ -8,25 +8,7 @@ export class UsersService {
 
   async findOne(id: number) {
     return this.prisma.appuser.findUnique({
-      where: { Id: id, status: true },
-      select: {
-        Id: true,
-        username: true,
-        password: true,
-        name: true,
-        paternalSurname: true,
-        maternalSurname: true,
-        gender: true,
-        phoneNumber: true,
-        registerDate: true,
-        updateDate: true,
-        appuser: {
-          select: {
-            Id: true,
-            username: true,
-          },
-        },
-      },
+      where: { Id: id, status: true }
     });
   }
 

@@ -36,7 +36,7 @@ export class AuthService {
     if (!checkPassword) throw new HttpException('PASSWORD_INCORRECT', 403);
     const token = await this.jwtService.signAsync(
       {
-        id: dbUser.Id,
+        sub: dbUser.Id,
         username: dbUser.username,
       },
       {
