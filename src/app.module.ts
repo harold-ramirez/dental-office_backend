@@ -18,6 +18,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
 import { OdontogramModule } from './odontogram/odontogram.module';
 import { AuthModule } from './auth/auth.module';
+import { EncryptionService } from './utils/encryption.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AuthModule } from './auth/auth.module';
     OdontogramModule,
     AuthModule,
   ],
-  providers: [],
+  providers: [EncryptionService],
+  exports: [EncryptionService],
 })
 export class AppModule {}

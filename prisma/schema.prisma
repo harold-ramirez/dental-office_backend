@@ -10,7 +10,7 @@ datasource db {
 model appointment {
   Id                    Int                 @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
   dateHour              DateTime            @db.DateTime(0)
-  notes                 String?             @db.VarChar(200)
+  notes                 String?             @db.VarChar(500)
   AppointmentRequest_Id Int?                @db.UnsignedMediumInt
   Treatment_Id          Int?                @db.UnsignedTinyInt
   Patient_Id            Int                 @db.UnsignedMediumInt
@@ -32,10 +32,10 @@ model appointment {
 
 model appointmentrequest {
   Id              Int           @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
-  patientFullName String        @db.VarChar(100)
+  patientFullName String        @db.VarChar(350)
   dateHourRequest DateTime      @db.DateTime(0)
-  phoneNumber     String        @db.VarChar(15)
-  message         String        @db.VarChar(500)
+  phoneNumber     String        @db.VarChar(300)
+  message         String        @db.Text
   AppUser_Id      Int?          @db.UnsignedTinyInt
   registerDate    DateTime      @default(now()) @db.Timestamp(0)
   updateDate      DateTime?     @db.Timestamp(0)
@@ -50,11 +50,11 @@ model appuser {
   Id                          Int                           @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
   username                    String                        @unique(map: "username_UNIQUE") @db.VarChar(45)
   password                    String                        @db.VarChar(255)
-  name                        String                        @db.VarChar(45)
-  paternalSurname             String?                       @db.VarChar(45)
-  maternalSurname             String?                       @db.VarChar(45)
+  name                        String                        @db.VarChar(150)
+  paternalSurname             String?                       @db.VarChar(150)
+  maternalSurname             String?                       @db.VarChar(150)
   gender                      String                        @db.Char(1)
-  phoneNumber                 String                        @db.VarChar(15)
+  phoneNumber                 String                        @db.VarChar(300)
   defaultMessage              String?                       @db.VarChar(200)
   sessionDurationMinutes      Int                           @default(60) @db.UnsignedSmallInt
   AppUser_Id                  Int                           @db.UnsignedTinyInt
@@ -84,7 +84,7 @@ model complementaryimage {
   Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
   fileName     String    @db.VarChar(100)
   captureDate  DateTime? @db.DateTime(0)
-  description  String?   @db.VarChar(500)
+  description  String?   @db.Text
   Patient_Id   Int       @db.UnsignedMediumInt
   AppUser_Id   Int       @db.UnsignedTinyInt
   registerDate DateTime  @default(now()) @db.Timestamp(0)
@@ -99,7 +99,7 @@ model complementaryimage {
 
 model diagnosedprocedure {
   Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  description              String?                    @db.VarChar(200)
+  description              String?                    @db.VarChar(500)
   totalCost                Decimal?                   @db.Decimal(7, 2)
   Patient_Id               Int                        @db.UnsignedMediumInt
   Treatment_Id             Int                        @db.UnsignedTinyInt
@@ -144,24 +144,24 @@ model habits {
 
 model medicalhistoryform {
   Id                                             Int                                              @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
-  familyPathologicalHistory                      String?                                          @db.VarChar(150)
-  allergies                                      String?                                          @db.VarChar(45)
-  pregnantMonths                                 String?                                          @db.VarChar(150)
-  medicalTreatment                               String?                                          @db.VarChar(45)
-  takingMedicine                                 String?                                          @db.VarChar(45)
-  hemorrhageType                                 String?                                          @db.VarChar(45)
-  tmj                                            String?                                          @db.VarChar(45)
-  lymphNodes                                     String?                                          @db.VarChar(45)
-  breathingType                                  String?                                          @db.VarChar(45)
-  others                                         String?                                          @db.VarChar(45)
-  lipsStatus                                     String?                                          @db.VarChar(45)
-  tongueStatus                                   String?                                          @db.VarChar(45)
-  palateStatus                                   String?                                          @db.VarChar(45)
-  mouthFloorStatus                               String?                                          @db.VarChar(45)
-  buccalMucousStatus                             String?                                          @db.VarChar(45)
-  gumsStatus                                     String?                                          @db.VarChar(45)
-  prosthesisLocation                             String?                                          @db.VarChar(45)
-  lastTimeVisitedDentist                         String?                                          @db.VarChar(45)
+  familyPathologicalHistory                      String?                                          @db.VarChar(500)
+  allergies                                      String?                                          @db.VarChar(300)
+  pregnantMonths                                 String?                                          @db.VarChar(500)
+  medicalTreatment                               String?                                          @db.VarChar(300)
+  takingMedicine                                 String?                                          @db.VarChar(300)
+  hemorrhageType                                 String?                                          @db.VarChar(300)
+  tmj                                            String?                                          @db.VarChar(300)
+  lymphNodes                                     String?                                          @db.VarChar(300)
+  breathingType                                  String?                                          @db.VarChar(300)
+  others                                         String?                                          @db.VarChar(300)
+  lipsStatus                                     String?                                          @db.VarChar(300)
+  tongueStatus                                   String?                                          @db.VarChar(300)
+  palateStatus                                   String?                                          @db.VarChar(300)
+  mouthFloorStatus                               String?                                          @db.VarChar(300)
+  buccalMucousStatus                             String?                                          @db.VarChar(300)
+  gumsStatus                                     String?                                          @db.VarChar(300)
+  prosthesisLocation                             String?                                          @db.VarChar(300)
+  lastTimeVisitedDentist                         String?                                          @db.VarChar(300)
   useDentalFloss                                 Boolean?                                         @db.Bit(1)
   useMouthWash                                   Boolean?                                         @db.Bit(1)
   toothBrushingFrequency                         String?                                          @db.VarChar(45)
@@ -221,16 +221,17 @@ model odontogram {
 
 model patient {
   Id                 Int                  @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedMediumInt
-  name               String               @db.VarChar(45)
-  paternalSurname    String?              @db.VarChar(45)
-  maternalSurname    String?              @db.VarChar(45)
+  name               String               @db.VarChar(150)
+  paternalSurname    String?              @db.VarChar(150)
+  maternalSurname    String?              @db.VarChar(150)
+  identityDocument   String               @unique(map: "documentNumber_UNIQUE") @db.VarChar(15)
   gender             String               @db.Char(1)
-  cellphoneNumber    String?              @db.VarChar(15)
-  telephoneNumber    String?              @db.VarChar(15)
-  placeOfBirth       String?              @db.VarChar(50)
+  cellphoneNumber    String?              @db.VarChar(300)
+  telephoneNumber    String?              @db.VarChar(300)
+  placeOfBirth       String?              @db.VarChar(200)
   birthdate          DateTime?            @db.Date
   occupation         String?              @db.VarChar(50)
-  address            String?              @db.VarChar(100)
+  address            String?              @db.VarChar(400)
   AppUser_Id         Int                  @db.UnsignedTinyInt
   registerDate       DateTime             @default(now()) @db.Timestamp(0)
   updateDate         DateTime?            @db.Timestamp(0)
