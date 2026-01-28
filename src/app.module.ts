@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TreatmentsModule } from './treatments/treatments.module';
 import { UsersModule } from './users/users.module';
 import { ShiftsModule } from './shifts/shifts.module';
@@ -16,9 +17,13 @@ import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-proced
 import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
 import { OdontogramModule } from './odontogram/odontogram.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MulterModule.register({
       dest: './uploads',
     }),
@@ -40,6 +45,7 @@ import { OdontogramModule } from './odontogram/odontogram.module';
     PaymentsModule,
     MedicalHistoryModule,
     OdontogramModule,
+    AuthModule,
   ],
   providers: [],
 })

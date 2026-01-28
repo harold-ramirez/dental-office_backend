@@ -35,7 +35,7 @@ model appointmentrequest {
   patientFullName String        @db.VarChar(100)
   dateHourRequest DateTime      @db.DateTime(0)
   phoneNumber     String        @db.VarChar(15)
-  message         String        @db.VarChar(200)
+  message         String        @db.VarChar(500)
   AppUser_Id      Int?          @db.UnsignedTinyInt
   registerDate    DateTime      @default(now()) @db.Timestamp(0)
   updateDate      DateTime?     @db.Timestamp(0)
@@ -48,7 +48,7 @@ model appointmentrequest {
 
 model appuser {
   Id                          Int                           @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedTinyInt
-  username                    String                        @db.VarChar(45)
+  username                    String                        @unique(map: "username_UNIQUE") @db.VarChar(45)
   password                    String                        @db.VarChar(255)
   name                        String                        @db.VarChar(45)
   paternalSurname             String?                       @db.VarChar(45)
@@ -56,6 +56,7 @@ model appuser {
   gender                      String                        @db.Char(1)
   phoneNumber                 String                        @db.VarChar(15)
   defaultMessage              String?                       @db.VarChar(200)
+  sessionDurationMinutes      Int                           @default(60) @db.UnsignedSmallInt
   AppUser_Id                  Int                           @db.UnsignedTinyInt
   registerDate                DateTime                      @default(now()) @db.Timestamp(0)
   updateDate                  DateTime?                     @db.Timestamp(0)
