@@ -7,10 +7,10 @@ export class UpdatePatientDto extends PartialType(CreatePatientDto) {
   maternalSurname?: string;
   gender?: string;
   cellphoneNumber?: string;
+  identityDocument: string;
   telephoneNumber?: string;
   placeOfBirth?: string;
   birthDate?: Date;
   occupation?: string;
   address?: string;
-  AppUser_Id: number;
 }
