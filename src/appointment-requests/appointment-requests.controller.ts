@@ -16,8 +16,15 @@ export class AppointmentRequestsController {
   constructor(
     private readonly appointmentRequestsService: AppointmentRequestsService,
   ) {}
-  // Landing Page
-  @Post('/')
+
+  // Landing Page (no Auth)
+  @Get('/calendar')
+  getLandingCalendar() {
+    return this.appointmentRequestsService.getLandingCalendar();
+  }
+
+  // Landing Page (no Auth)
+  @Post()
   create(@Body() createAppointmentRequestDto: CreateAppointmentRequestDto) {
     return this.appointmentRequestsService.create(createAppointmentRequestDto);
   }

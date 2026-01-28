@@ -10,6 +10,10 @@ export class AppointmentRequestsService {
     private appointmentsService: AppointmentsService,
   ) {}
 
+  async getLandingCalendar() {
+    return "Landing Calendar"
+  }
+
   async findAll() {
     return this.prisma.appointmentrequest.findMany({
       where: { status: true },
