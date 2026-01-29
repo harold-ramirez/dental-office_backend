@@ -113,6 +113,12 @@ export class PatientsService {
 
     return {
       ...dbPatient,
+      complementaryimage: dbPatient.complementaryimage.map((image) => ({
+        ...image,
+        description: image.description
+          ? this.encryption.decrypt(image.description)
+          : null,
+      })),
       name: this.encryption.decrypt(dbPatient.name),
       paternalSurname: dbPatient.paternalSurname
         ? this.encryption.decrypt(dbPatient.paternalSurname)

@@ -4,19 +4,35 @@ import { PrismaService } from 'src/prisma.service';
 import { hash, compare } from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { EncryptionService } from 'src/utils/encryption.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private encryption: EncryptionService,
   ) {}
 
   async register(body: RegisterAuthDto) {
+    const userCount = await this.prisma.appuser.count({
+      where: { status: true },
+    });
+    if (userCount >= 2)
+      throw new HttpException('REGISTRATION_LIMIT_REACHED', 403);
+
     const { password } = body;
     const hashedPassword = await hash(password, 10);
     body = {
       ...body,
+      name: this.encryption.encrypt(body.name),
+      paternalSurname: body.paternalSurname
+        ? this.encryption.encrypt(body.paternalSurname)
+        : null,
+      maternalSurname: body.maternalSurname
+        ? this.encryption.encrypt(body.maternalSurname)
+        : null,
+      phoneNumber: this.encryption.encrypt(body.phoneNumber),
       password: hashedPassword,
     };
 
@@ -27,9 +43,7 @@ export class AuthService {
 
   async login(body: LoginAuthDto) {
     const dbUser = await this.prisma.appuser.findFirst({
-      where: {
-        username: body.username,
-      },
+      where: { username: body.username },
     });
     if (!dbUser) throw new HttpException('USER_NOT_FOUND', 404);
     const checkPassword = await compare(body.password, dbUser.password);
@@ -44,7 +58,6 @@ export class AuthService {
       },
     );
     const data = {
-      user: dbUser,
       token: token,
     };
 

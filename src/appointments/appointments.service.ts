@@ -148,7 +148,9 @@ export class AppointmentsService {
     const mapAppointmentToDto = (appointment) => ({
       dateHour: appointment.dateHour,
       minutesDuration: appointment.minutesDuration,
-      requestMessage: appointment.appointmentrequest?.message ?? null,
+      requestMessage: appointment.appointmentrequest.message
+        ? this.encryption.decrypt(appointment.appointmentrequest.message)
+        : null,
       treatment: appointment.treatment?.name ?? null,
       notes: appointment.notes
         ? this.encryption.decrypt(appointment.notes)
@@ -274,13 +276,23 @@ export class AppointmentsService {
         notes: appointment.notes
           ? this.encryption.decrypt(appointment.notes)
           : null,
-        requestMessage: appointment.appointmentrequest?.message ?? null,
-        requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
-        patientPhoneNumber: appointment.patient.cellphoneNumber,
+        requestMessage: appointment.appointmentrequest?.message
+          ? this.encryption.decrypt(appointment.appointmentrequest.message)
+          : null,
+        requestPhoneNumber: appointment.appointmentrequest?.phoneNumber
+          ? this.encryption.decrypt(appointment.appointmentrequest.phoneNumber)
+          : null,
+        patientPhoneNumber: appointment.patient.cellphoneNumber
+          ? this.encryption.decrypt(appointment.patient.cellphoneNumber)
+          : null,
         patient: [
-          appointment.patient.name,
-          appointment.patient.paternalSurname,
-          appointment.patient.maternalSurname,
+          this.encryption.decrypt(appointment.patient.name),
+          appointment.patient.paternalSurname
+            ? this.encryption.decrypt(appointment.patient.paternalSurname)
+            : null,
+          appointment.patient.maternalSurname
+            ? this.encryption.decrypt(appointment.patient.maternalSurname)
+            : null,
         ]
           .filter(Boolean)
           .join(' '),
@@ -363,12 +375,18 @@ export class AppointmentsService {
         treatmentID: appointment.treatment?.Id ?? null,
         requestMessage: appointment.appointmentrequest?.message ?? null,
         requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
-        patientPhoneNumber: appointment.patient.cellphoneNumber,
         patientID: appointment.patient.Id,
+        patientPhoneNumber: appointment.patient.cellphoneNumber
+          ? this.encryption.decrypt(appointment.patient.cellphoneNumber)
+          : null,
         patient: [
-          appointment.patient.name,
-          appointment.patient.paternalSurname,
-          appointment.patient.maternalSurname,
+          this.encryption.decrypt(appointment.patient.name),
+          appointment.patient.paternalSurname
+            ? this.encryption.decrypt(appointment.patient.paternalSurname)
+            : null,
+          appointment.patient.maternalSurname
+            ? this.encryption.decrypt(appointment.patient.maternalSurname)
+            : null,
         ]
           .filter(Boolean)
           .join(' '),
@@ -486,6 +504,25 @@ export class AppointmentsService {
     if (!dbAppointment) throw new HttpException('Appointment not found', 404);
     return {
       ...dbAppointment,
+      patient: {
+        Id: dbAppointment.patient.Id,
+        name: this.encryption.decrypt(dbAppointment.patient.name),
+        paternalSurname: dbAppointment.patient.paternalSurname
+          ? this.encryption.decrypt(dbAppointment.patient.paternalSurname)
+          : null,
+        maternalSurname: dbAppointment.patient.maternalSurname
+          ? this.encryption.decrypt(dbAppointment.patient.maternalSurname)
+          : null,
+        cellphoneNumber: dbAppointment.patient.cellphoneNumber
+          ? this.encryption.decrypt(dbAppointment.patient.cellphoneNumber)
+          : null,
+      },
+      appointmentrequest: {
+        ...dbAppointment.appointmentrequest,
+        message: dbAppointment.appointmentrequest?.message
+          ? this.encryption.decrypt(dbAppointment.appointmentrequest.message)
+          : null,
+      },
       notes: dbAppointment.notes
         ? this.encryption.decrypt(dbAppointment.notes)
         : null,
