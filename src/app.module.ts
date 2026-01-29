@@ -19,12 +19,14 @@ import { MedicalHistoryModule } from './medical-history/medical-history.module';
 import { OdontogramModule } from './odontogram/odontogram.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionService } from './utils/encryption.service';
+import { PrismaModule } from './prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    PrismaModule,
     MulterModule.register({
       dest: './uploads',
     }),

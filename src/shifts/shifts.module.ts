@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ShiftsService } from './shifts.service';
 import { ShiftsController } from './shifts.controller';
-import { PrismaService } from 'src/prisma.service';
 
 @Module({
   controllers: [ShiftsController],
-  providers: [ShiftsService, PrismaService],
+  providers: [ShiftsService],
 })
 export class ShiftsModule {}
