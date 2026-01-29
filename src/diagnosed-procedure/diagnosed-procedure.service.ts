@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateDiagnosedProcedureDto } from './dto/create-diagnosed-procedure.dto';
 import { UpdateDiagnosedProcedureDto } from './dto/update-diagnosed-procedure.dto';
 import { PrismaService } from 'src/prisma.service';
+import { EncryptionService } from 'src/utils/encryption.service';
 
 @Injectable()
 export class DiagnosedProcedureService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private encryption: EncryptionService,
+  ) {}
 
   async preview(patientId: number) {
     return await this.prisma.diagnosedprocedure.findMany({
@@ -56,40 +60,47 @@ export class DiagnosedProcedureService {
         },
       },
     });
-    const diagnosedProcedureDto: any[] = [];
-    data.map((item) => {
-      diagnosedProcedureDto.push({
-        Id: item.Id,
-        description: item.description,
-        totalCost: item.totalCost,
-        Treatment: {
-          Id: item.treatment.Id,
-          name: item.treatment.name,
-          description: item.treatment.description,
-        },
-        totalPieces: item.diagnosedprocedure_tooth.length,
-        registerDate: item.registerDate,
-        updateDate: item.updateDate,
-      });
-    });
-    return diagnosedProcedureDto;
+    return await data.map((item) => ({
+      Id: item.Id,
+      description: item.description
+        ? this.encryption.decrypt(item.description)
+        : null,
+      totalCost: item.totalCost,
+      Treatment: {
+        Id: item.treatment.Id,
+        name: item.treatment.name,
+        description: item.treatment.description,
+      },
+      totalPieces: item.diagnosedprocedure_tooth.length,
+      registerDate: item.registerDate,
+      updateDate: item.updateDate,
+    }));
   }
 
   async findOne(id: number) {
-    return await this.prisma.diagnosedprocedure.findUnique({
+    const data = await this.prisma.diagnosedprocedure.findUnique({
       where: { Id: id, status: true },
     });
+    if (!data) throw new HttpException('Procedure not found', 404);
+    return {
+      ...data,
+      description: data.description
+        ? this.encryption.decrypt(data.description)
+        : null,
+    };
   }
 
-  async create(body: CreateDiagnosedProcedureDto) {
+  async create(body: CreateDiagnosedProcedureDto, userID: number) {
     return await this.prisma.$transaction(async (tx) => {
       const createdProcedure = await tx.diagnosedprocedure.create({
         data: {
-          description: body.description,
+          description: body.description
+            ? this.encryption.encrypt(body.description)
+            : null,
           totalCost: body.totalCost,
           Patient_Id: body.Patient_Id,
           Treatment_Id: body.Treatment_Id,
-          AppUser_Id: body.AppUser_Id,
+          AppUser_Id: userID,
         },
       });
 
@@ -112,20 +123,24 @@ export class DiagnosedProcedureService {
     });
   }
 
-  async update(
-    id: number,
-    updateDiagnosedProcedureDto: UpdateDiagnosedProcedureDto,
-  ) {
+  async update(id: number, body: UpdateDiagnosedProcedureDto, userID: number) {
     return await this.prisma.diagnosedprocedure.update({
       where: { Id: id, status: true },
-      data: { ...updateDiagnosedProcedureDto, updateDate: new Date() },
+      data: {
+        ...body,
+        description: body.description
+          ? this.encryption.encrypt(body.description)
+          : null,
+        updateDate: new Date(),
+        AppUser_Id: userID,
+      },
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, userID: number) {
     return await this.prisma.diagnosedprocedure.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: new Date(), AppUser_Id: userID },
     });
   }
 }

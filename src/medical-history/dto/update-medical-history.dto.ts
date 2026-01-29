@@ -4,7 +4,6 @@
 // export class UpdateMedicalHistoryDto extends PartialType(CreateMedicalHistoryDto) {
 //   Id: number;
 //   registerDate: Date;
-//   AppUser_Id: number;
 //   Patient_Id: number;
 //   personalPathologieshistory: [];
 //   habits: [];

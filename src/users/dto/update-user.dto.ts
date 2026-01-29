@@ -1,5 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-
 export class UpdateUserDto {
   username?: string;
   password?: string;
@@ -8,6 +6,7 @@ export class UpdateUserDto {
   maternalSurname?: string;
   gender?: string;
   phoneNumber?: string;
-  AppUser_Id: number;
+  defaultMessage?: string;
+  sessionDurationMinutes: number;
   updateDate: Date | null;
 }

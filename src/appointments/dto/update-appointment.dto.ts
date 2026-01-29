@@ -5,7 +5,7 @@ export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) {
   dateHour?: Date;
   AppointmentRequest_Id?: number;
   DiagnosedProcedure_Id?: number;
+  notes: string | null;
   Patient_Id: number;
   minutesDuration?: number;
-  AppUser_Id: number;
 }

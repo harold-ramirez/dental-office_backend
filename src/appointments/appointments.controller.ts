@@ -12,6 +12,7 @@ import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('appointments')
@@ -54,20 +55,28 @@ export class AppointmentsController {
   }
 
   @Post()
-  create(@Body() createAppointmentDto: CreateAppointmentDto) {
-    return this.appointmentsService.create(createAppointmentDto);
+  create(
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @User() user: JwtUser,
+  ) {
+    return this.appointmentsService.create(createAppointmentDto, user.userID);
   }
 
   @Patch('/:id')
   update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
+    @User() user: JwtUser,
   ) {
-    return this.appointmentsService.update(+id, updateAppointmentDto);
+    return this.appointmentsService.update(
+      +id,
+      updateAppointmentDto,
+      user.userID,
+    );
   }
 
   @Delete('/:id')
-  softDelete(@Param('id') id: string) {
-    return this.appointmentsService.softDelete(+id);
+  softDelete(@Param('id') id: string, @User() user: JwtUser) {
+    return this.appointmentsService.softDelete(+id, user.userID);
   }
 }

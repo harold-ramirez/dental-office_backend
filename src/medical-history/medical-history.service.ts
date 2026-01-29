@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateMedicalHistoryDto } from './dto/create-medical-history.dto';
 // import { UpdateMedicalHistoryDto } from './dto/update-medical-history.dto';
 import { PrismaService } from 'src/prisma.service';
+import { EncryptionService } from 'src/utils/encryption.service';
 
 @Injectable()
 export class MedicalHistoryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private encryption: EncryptionService,
+  ) {}
 
   async preview(id: number) {
     return await this.prisma.medicalhistoryform.findMany({
@@ -72,6 +76,65 @@ export class MedicalHistoryService {
     const dtoHistories: any = [];
     dbMedicalHistories.forEach((dbHistory) => {
       dtoHistories.push({
+        Id: dbHistory.Id,
+        registerDate: dbHistory.registerDate,
+        familyPathologicalHistory: dbHistory.familyPathologicalHistory
+          ? this.encryption.decrypt(dbHistory.familyPathologicalHistory)
+          : null,
+        allergies: dbHistory.allergies
+          ? this.encryption.decrypt(dbHistory.allergies)
+          : null,
+        pregnantMonths: dbHistory.pregnantMonths
+          ? this.encryption.decrypt(dbHistory.pregnantMonths)
+          : null,
+        medicalTreatment: dbHistory.medicalTreatment
+          ? this.encryption.decrypt(dbHistory.medicalTreatment)
+          : null,
+        takingMedicine: dbHistory.takingMedicine
+          ? this.encryption.decrypt(dbHistory.takingMedicine)
+          : null,
+        hemorrhageType: dbHistory.hemorrhageType
+          ? this.encryption.decrypt(dbHistory.hemorrhageType)
+          : null,
+        tmj: dbHistory.tmj ? this.encryption.decrypt(dbHistory.tmj) : null,
+        lymphNodes: dbHistory.lymphNodes
+          ? this.encryption.decrypt(dbHistory.lymphNodes)
+          : null,
+        breathingType: dbHistory.breathingType
+          ? this.encryption.decrypt(dbHistory.breathingType)
+          : null,
+        others: dbHistory.others
+          ? this.encryption.decrypt(dbHistory.others)
+          : null,
+        lipsStatus: dbHistory.lipsStatus
+          ? this.encryption.decrypt(dbHistory.lipsStatus)
+          : null,
+        tongueStatus: dbHistory.tongueStatus
+          ? this.encryption.decrypt(dbHistory.tongueStatus)
+          : null,
+        palateStatus: dbHistory.palateStatus
+          ? this.encryption.decrypt(dbHistory.palateStatus)
+          : null,
+        mouthFloorStatus: dbHistory.mouthFloorStatus
+          ? this.encryption.decrypt(dbHistory.mouthFloorStatus)
+          : null,
+        buccalMucousStatus: dbHistory.buccalMucousStatus
+          ? this.encryption.decrypt(dbHistory.buccalMucousStatus)
+          : null,
+        gumsStatus: dbHistory.gumsStatus
+          ? this.encryption.decrypt(dbHistory.gumsStatus)
+          : null,
+        prosthesisLocation: dbHistory.prosthesisLocation
+          ? this.encryption.decrypt(dbHistory.prosthesisLocation)
+          : null,
+        lastTimeVisitedDentist: dbHistory.lastTimeVisitedDentist
+          ? this.encryption.decrypt(dbHistory.lastTimeVisitedDentist)
+          : null,
+        useDentalFloss: dbHistory.useDentalFloss,
+        useMouthWash: dbHistory.useMouthWash,
+        toothBrushingFrequency: dbHistory.toothBrushingFrequency,
+        hasBleedOnToothBrushing: dbHistory.hasBleedOnToothBrushing,
+        oralHygiene: dbHistory.oralHygiene,
         personalPathologieshistory:
           dbHistory.medicalhistoryform_personalpathologicalhistory.map(
             (history) => {
@@ -88,64 +151,71 @@ export class MedicalHistoryService {
             name: habit.habits.name,
           };
         }),
-        Id: dbHistory.Id,
-        registerDate: dbHistory.registerDate,
-        familyPathologicalHistory: dbHistory.familyPathologicalHistory,
-        allergies: dbHistory.allergies,
-        pregnantMonths: dbHistory.pregnantMonths,
-        medicalTreatment: dbHistory.medicalTreatment,
-        takingMedicine: dbHistory.takingMedicine,
-        hemorrhageType: dbHistory.hemorrhageType,
-        tmj: dbHistory.tmj,
-        lymphNodes: dbHistory.lymphNodes,
-        breathingType: dbHistory.breathingType,
-        others: dbHistory.others,
-        lipsStatus: dbHistory.lipsStatus,
-        tongueStatus: dbHistory.tongueStatus,
-        palateStatus: dbHistory.palateStatus,
-        mouthFloorStatus: dbHistory.mouthFloorStatus,
-        buccalMucousStatus: dbHistory.buccalMucousStatus,
-        gumsStatus: dbHistory.gumsStatus,
-        prosthesisLocation: dbHistory.prosthesisLocation,
-        lastTimeVisitedDentist: dbHistory.lastTimeVisitedDentist,
-        useDentalFloss: dbHistory.useDentalFloss,
-        useMouthWash: dbHistory.useMouthWash,
-        toothBrushingFrequency: dbHistory.toothBrushingFrequency,
-        hasBleedOnToothBrushing: dbHistory.hasBleedOnToothBrushing,
-        oralHygiene: dbHistory.oralHygiene,
       });
     });
     return dtoHistories;
   }
 
-  async create(body: CreateMedicalHistoryDto) {
+  async create(body: CreateMedicalHistoryDto, userID: number) {
     const result = await this.prisma.$transaction(async (tx) => {
       const createdMedicalHistory = await tx.medicalhistoryform.create({
         data: {
-          familyPathologicalHistory: body.familyPathologicalHistory,
-          allergies: body.allergies,
-          pregnantMonths: body.pregnantMonths,
-          medicalTreatment: body.medicalTreatment,
-          takingMedicine: body.takingMedicine,
-          hemorrhageType: body.hemorrhageType,
-          tmj: body.tmj,
-          lymphNodes: body.lymphNodes,
-          breathingType: body.breathingType,
-          others: body.others,
-          lipsStatus: body.lipsStatus,
-          tongueStatus: body.tongueStatus,
-          palateStatus: body.palateStatus,
-          mouthFloorStatus: body.mouthFloorStatus,
-          buccalMucousStatus: body.buccalMucousStatus,
-          gumsStatus: body.gumsStatus,
-          prosthesisLocation: body.prosthesisLocation,
-          lastTimeVisitedDentist: body.lastTimeVisitedDentist,
+          familyPathologicalHistory: body.familyPathologicalHistory
+            ? this.encryption.encrypt(body.familyPathologicalHistory)
+            : null,
+          allergies: body.allergies
+            ? this.encryption.encrypt(body.allergies)
+            : null,
+          pregnantMonths: body.pregnantMonths
+            ? this.encryption.encrypt(body.pregnantMonths)
+            : null,
+          medicalTreatment: body.medicalTreatment
+            ? this.encryption.encrypt(body.medicalTreatment)
+            : null,
+          takingMedicine: body.takingMedicine
+            ? this.encryption.encrypt(body.takingMedicine)
+            : null,
+          hemorrhageType: body.hemorrhageType
+            ? this.encryption.encrypt(body.hemorrhageType)
+            : null,
+          tmj: body.tmj ? this.encryption.encrypt(body.tmj) : null,
+          lymphNodes: body.lymphNodes
+            ? this.encryption.encrypt(body.lymphNodes)
+            : null,
+          breathingType: body.breathingType
+            ? this.encryption.encrypt(body.breathingType)
+            : null,
+          others: body.others ? this.encryption.encrypt(body.others) : null,
+          lipsStatus: body.lipsStatus
+            ? this.encryption.encrypt(body.lipsStatus)
+            : null,
+          tongueStatus: body.tongueStatus
+            ? this.encryption.encrypt(body.tongueStatus)
+            : null,
+          palateStatus: body.palateStatus
+            ? this.encryption.encrypt(body.palateStatus)
+            : null,
+          mouthFloorStatus: body.mouthFloorStatus
+            ? this.encryption.encrypt(body.mouthFloorStatus)
+            : null,
+          buccalMucousStatus: body.buccalMucousStatus
+            ? this.encryption.encrypt(body.buccalMucousStatus)
+            : null,
+          gumsStatus: body.gumsStatus
+            ? this.encryption.encrypt(body.gumsStatus)
+            : null,
+          prosthesisLocation: body.prosthesisLocation
+            ? this.encryption.encrypt(body.prosthesisLocation)
+            : null,
+          lastTimeVisitedDentist: body.lastTimeVisitedDentist
+            ? this.encryption.encrypt(body.lastTimeVisitedDentist)
+            : null,
           useDentalFloss: body.useDentalFloss,
           useMouthWash: body.useMouthWash,
           toothBrushingFrequency: body.toothBrushingFrequency,
           hasBleedOnToothBrushing: body.hasBleedOnToothBrushing,
           oralHygiene: body.oralHygiene,
-          AppUser_Id: body.AppUser_Id,
+          AppUser_Id: userID,
           Patient_Id: body.Patient_Id,
         },
       });
@@ -242,10 +312,10 @@ export class MedicalHistoryService {
   //   return `This action updates a #${id} medicalHistory`;
   // }
 
-  async softDelete(id: number) {
+  async softDelete(id: number, userID: number) {
     return await this.prisma.medicalhistoryform.update({
       where: { Id: id },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: new Date(), AppUser_Id: userID },
     });
   }
 }

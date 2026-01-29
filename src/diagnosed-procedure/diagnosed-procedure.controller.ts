@@ -12,6 +12,7 @@ import { DiagnosedProcedureService } from './diagnosed-procedure.service';
 import { CreateDiagnosedProcedureDto } from './dto/create-diagnosed-procedure.dto';
 import { UpdateDiagnosedProcedureDto } from './dto/update-diagnosed-procedure.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('diagnosed-procedure')
@@ -20,7 +21,7 @@ export class DiagnosedProcedureController {
     private readonly diagnosedProcedureService: DiagnosedProcedureService,
   ) {}
 
-@Get(':patientId/preview')
+  @Get(':patientId/preview')
   preview(@Param('patientId') patientId: string) {
     return this.diagnosedProcedureService.preview(+patientId);
   }
@@ -36,23 +37,25 @@ export class DiagnosedProcedureController {
   }
 
   @Post()
-  create(@Body() createDiagnosedProcedureDto: CreateDiagnosedProcedureDto) {
-    return this.diagnosedProcedureService.create(createDiagnosedProcedureDto);
+  create(@Body() body: CreateDiagnosedProcedureDto, @User() user: JwtUser) {
+    return this.diagnosedProcedureService.create(body, user.userID);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateDiagnosedProcedureDto: UpdateDiagnosedProcedureDto,
+    @Body() body: UpdateDiagnosedProcedureDto,
+    @User() user: JwtUser
   ) {
     return this.diagnosedProcedureService.update(
       +id,
-      updateDiagnosedProcedureDto,
+      body,
+      user.userID
     );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.diagnosedProcedureService.remove(+id);
+  remove(@Param('id') id: string, @User() user: JwtUser) {
+    return this.diagnosedProcedureService.remove(+id, user.userID);
   }
 }

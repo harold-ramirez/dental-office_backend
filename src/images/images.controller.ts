@@ -17,6 +17,7 @@ import { UploadedFile } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('images')
@@ -44,13 +45,18 @@ export class ImagesController {
   create(
     @Body() createImageDto: CreateImageDto,
     @UploadedFile() image: Express.Multer.File,
+    @User() user: JwtUser,
   ) {
-    return this.imagesService.create(createImageDto, image);
+    return this.imagesService.create(createImageDto, image, user.userID);
   }
 
   @Patch('/:id')
-  update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
-    return this.imagesService.update(+id, updateImageDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateImageDto: UpdateImageDto,
+    @User() user: JwtUser,
+  ) {
+    return this.imagesService.update(+id, updateImageDto, user.userID);
   }
 
   @Delete('/:imgId')

@@ -10,6 +10,7 @@ import {
 import { AppointmentRequestsService } from './appointment-requests.service';
 import { CreateAppointmentRequestDto } from './dto/create-appointment-request.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @Controller('appointment-requests')
 export class AppointmentRequestsController {
@@ -48,8 +49,8 @@ export class AppointmentRequestsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('/:id/:userId')
-  markAsRead(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.appointmentRequestsService.markAsRead(+id, +userId);
+  @Patch('/:id')
+  markAsRead(@Param('id') id: string, @User() user: JwtUser) {
+    return this.appointmentRequestsService.markAsRead(+id, user.userID);
   }
 }

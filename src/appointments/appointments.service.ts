@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import {
   CreateAppointmentDto,
   WeekScheduleDto,
 } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from 'src/prisma.service';
+import { EncryptionService } from 'src/utils/encryption.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private encryption: EncryptionService,
+  ) {}
 
   async summary() {
     const now = new Date();
@@ -146,7 +150,9 @@ export class AppointmentsService {
       minutesDuration: appointment.minutesDuration,
       requestMessage: appointment.appointmentrequest?.message ?? null,
       treatment: appointment.treatment?.name ?? null,
-      notes: appointment.notes ?? null,
+      notes: appointment.notes
+        ? this.encryption.decrypt(appointment.notes)
+        : null,
     });
 
     const appointmentSelect = {
@@ -265,7 +271,9 @@ export class AppointmentsService {
         treatmentID: appointment.treatment?.Id ?? null,
         patientID: appointment.patient.Id,
         minutesDuration: appointment.minutesDuration,
-        notes: appointment.notes,
+        notes: appointment.notes
+          ? this.encryption.decrypt(appointment.notes)
+          : null,
         requestMessage: appointment.appointmentrequest?.message ?? null,
         requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
         patientPhoneNumber: appointment.patient.cellphoneNumber,
@@ -348,7 +356,9 @@ export class AppointmentsService {
         Id: appointment.Id,
         dateHour: appointment.dateHour,
         minutesDuration: appointment.minutesDuration,
-        notes: appointment.notes,
+        notes: appointment.notes
+          ? this.encryption.decrypt(appointment.notes)
+          : null,
         treatment: appointment.treatment?.name ?? null,
         treatmentID: appointment.treatment?.Id ?? null,
         requestMessage: appointment.appointmentrequest?.message ?? null,
@@ -432,11 +442,15 @@ export class AppointmentsService {
   }
 
   async findOne(id: number) {
-    return this.prisma.appointment.findUnique({
+    const dbAppointment = await this.prisma.appointment.findUnique({
       where: { Id: id, status: true },
       select: {
         Id: true,
         dateHour: true,
+        notes: true,
+        minutesDuration: true,
+        registerDate: true,
+        updateDate: true,
         treatment: {
           select: {
             Id: true,
@@ -461,39 +475,53 @@ export class AppointmentsService {
             cellphoneNumber: true,
           },
         },
-        minutesDuration: true,
         appuser: {
           select: {
             Id: true,
             username: true,
           },
         },
-        registerDate: true,
-        updateDate: true,
+      },
+    });
+    if (!dbAppointment) throw new HttpException('Appointment not found', 404);
+    return {
+      ...dbAppointment,
+      notes: dbAppointment.notes
+        ? this.encryption.decrypt(dbAppointment.notes)
+        : null,
+    };
+  }
+
+  async create(body: CreateAppointmentDto, userID: number) {
+    return this.prisma.appointment.create({
+      data: {
+        ...body,
+        AppUser_Id: userID,
+        notes: body.notes ? this.encryption.encrypt(body.notes) : null,
       },
     });
   }
 
-  async create(createAppointmentDto: CreateAppointmentDto) {
-    return this.prisma.appointment.create({
-      data: createAppointmentDto,
-    });
-  }
-
-  async update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
+  async update(id: number, body: UpdateAppointmentDto, userID: number) {
     return this.prisma.appointment.update({
       where: { Id: id, status: true },
       data: {
-        ...updateAppointmentDto,
+        ...body,
+        notes: body.notes ? this.encryption.encrypt(body.notes) : null,
         updateDate: new Date(),
+        AppUser_Id: userID,
       },
     });
   }
 
-  async softDelete(id: number) {
+  async softDelete(id: number, userID: number) {
     return this.prisma.appointment.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: {
+        status: false,
+        updateDate: new Date(),
+        AppUser_Id: userID,
+      },
     });
   }
 }

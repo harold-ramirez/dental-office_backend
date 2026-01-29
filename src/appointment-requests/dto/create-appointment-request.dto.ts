@@ -3,5 +3,4 @@ export class CreateAppointmentRequestDto {
   dateHourRequest: Date;
   phoneNumber: string;
   message: string;
-  AppUser_Id?: number;
 }

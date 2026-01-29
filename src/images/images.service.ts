@@ -1,4 +1,5 @@
 import {
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,10 +9,14 @@ import { UpdateImageDto } from './dto/update-image.dto';
 import { PrismaService } from 'src/prisma.service';
 import * as fs from 'fs';
 import { join } from 'path';
+import { EncryptionService } from 'src/utils/encryption.service';
 
 @Injectable()
 export class ImagesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private encryption: EncryptionService,
+  ) {}
 
   async findAll(patientId: number) {
     const images = await this.prisma.complementaryimage.findMany({
@@ -36,55 +41,54 @@ export class ImagesService {
         registerDate: 'desc',
       },
     });
-    const imagesDto = images.map((img) => {
-      const imageDto = {
-        Id: img.Id,
-        filename: img.fileName,
-        captureDate: img.captureDate,
-        description: img.description,
-        registerDate: img.registerDate,
-        updateDate: img.updateDate,
-        user: img.appuser.username,
-      };
-      return imageDto;
-    });
-    return imagesDto;
+    return images.map((img) => ({
+      Id: img.Id,
+      filename: img.fileName,
+      captureDate: img.captureDate,
+      description: img.description
+        ? this.encryption.decrypt(img.description)
+        : null,
+      registerDate: img.registerDate,
+      updateDate: img.updateDate,
+      user: img.appuser.username,
+    }));
   }
 
-  async create(createImageDto: CreateImageDto, image: Express.Multer.File) {
-    const img = await this.prisma.complementaryimage.create({
+  async create(
+    body: CreateImageDto,
+    image: Express.Multer.File,
+    userID: number,
+  ) {
+    return await this.prisma.complementaryimage.create({
       data: {
         fileName: image.filename,
-        captureDate: createImageDto.captureDate,
-        description: createImageDto.description,
-        Patient_Id: +createImageDto.Patient_Id,
-        AppUser_Id: +createImageDto.AppUser_Id,
+        captureDate: body.captureDate,
+        description: body.description
+          ? this.encryption.encrypt(body.description)
+          : null,
+        Patient_Id: +body.Patient_Id,
+        AppUser_Id: userID,
       },
     });
-    return img;
   }
 
-  async update(id: number, updateImageDto: UpdateImageDto) {
+  async update(id: number, body: UpdateImageDto, userID: number) {
     const img = await this.prisma.complementaryimage.findUnique({
-      where: {
-        Id: id,
-      },
+      where: { Id: id },
     });
-    if (!img) {
-      throw new NotFoundException('Imagen no encontrada');
-    }
-    const updatedImg = await this.prisma.complementaryimage.update({
-      where: {
-        Id: id,
-      },
+    if (!img) throw new HttpException('IMAGE_NOT_FOUND', 404);
+
+    return await this.prisma.complementaryimage.update({
+      where: { Id: id },
       data: {
-        captureDate: updateImageDto.captureDate ?? img.captureDate,
-        description: updateImageDto.description ?? img.description,
-        Patient_Id: updateImageDto.Patient_Id,
-        AppUser_Id: updateImageDto.AppUser_Id,
+        captureDate: body.captureDate ? body.captureDate : null,
+        description: body.description
+          ? this.encryption.encrypt(body.description)
+          : null,
+        Patient_Id: body.Patient_Id,
+        AppUser_Id: userID,
       },
     });
-    return updatedImg;
   }
 
   async remove(imgId: number) {
@@ -93,7 +97,7 @@ export class ImagesService {
       const img = await this.prisma.complementaryimage.findUnique({
         where: { Id: imgId },
       });
-      if (!img) throw new NotFoundException('Imagen no encontrada');
+      if (!img) throw new HttpException('IMAGE_NOT_FOUND', 404);
 
       // Delete physical file
       const filePath = join(__dirname, '..', '..', 'uploads', img.fileName);

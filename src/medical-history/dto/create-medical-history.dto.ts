@@ -1,5 +1,4 @@
 export class CreateMedicalHistoryDto {
-  AppUser_Id: number;
   Patient_Id: number;
   personalPathologieshistory: {
     Id: number;
