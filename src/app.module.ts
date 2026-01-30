@@ -10,9 +10,9 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentRequestsModule } from './appointment-requests/appointment-requests.module';
 import { ImagesModule } from './images/images.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { ServeStaticModule } from '@nestjs/serve-static';
+// import { ServeStaticModule } from '@nestjs/serve-static';
 import { GatewayModule } from './websocket/websocket.module';
-import { join } from 'path';
+// import { join } from 'path';
 import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-procedure.module';
 import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
@@ -30,10 +30,10 @@ import { PrismaModule } from './prisma.module';
     MulterModule.register({
       dest: './uploads',
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'uploads'),
+    //   serveRoot: '/uploads',
+    // }),
     TreatmentsModule,
     UsersModule,
     ShiftsModule,

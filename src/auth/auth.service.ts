@@ -5,6 +5,7 @@ import { hash, compare } from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { JwtUser } from 'src/auth/user.decorator';
 
 @Injectable()
 export class AuthService {
@@ -62,5 +63,12 @@ export class AuthService {
     };
 
     return data;
+  }
+
+  async me(user: JwtUser) {
+    return await this.prisma.appuser.findUnique({
+      where: { Id: user.userID },
+      select: { Id: true, username: true },
+    });
   }
 }

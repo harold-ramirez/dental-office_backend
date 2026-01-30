@@ -1,5 +1,6 @@
 import {
   Controller,
+  Res,
   Get,
   Post,
   Body,
@@ -9,6 +10,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ImagesService } from './images.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
@@ -27,6 +29,11 @@ export class ImagesController {
   @Get('/:patientId')
   findAll(@Param('patientId') patientId: string) {
     return this.imagesService.findAll(+patientId);
+  }
+
+  @Get('/file/:filename')
+  getImageFile(@Param('filename') filename: string, @Res() res: Response) {
+    return res.sendFile(filename, { root: './uploads' });
   }
 
   @Post()
