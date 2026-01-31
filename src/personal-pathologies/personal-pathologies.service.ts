@@ -24,9 +24,9 @@ export class PersonalPathologiesService {
     });
   }
 
-  async create(createPersonalPathologyDto: CreatePersonalPathologyDto) {
+  async create(createPersonalPathologyDto: CreatePersonalPathologyDto, userID: number) {
     return this.prisma.personalpathologicalhistory.create({
-      data: createPersonalPathologyDto,
+      data: {...createPersonalPathologyDto, AppUser_Id: userID},
     });
   }
 

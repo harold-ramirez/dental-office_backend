@@ -3,5 +3,4 @@ import { CreatePersonalPathologyDto } from './create-personal-pathology.dto';
 
 export class UpdatePersonalPathologyDto extends PartialType(CreatePersonalPathologyDto) {
   name?: string;
-  AppUser_Id: number;
 }

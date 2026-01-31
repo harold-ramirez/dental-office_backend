@@ -24,9 +24,9 @@ export class HabitsService {
     });
   }
 
-  async create(createHabitDto: CreateHabitDto) {
+  async create(createHabitDto: CreateHabitDto, userID: number) {
     return this.prisma.habits.create({
-      data: createHabitDto,
+      data: {...createHabitDto, AppUser_Id: userID},
     });
   }
 

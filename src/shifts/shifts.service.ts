@@ -40,22 +40,22 @@ export class ShiftsService {
     return groupedByDay;
   }
 
-  async create(createShiftDto: CreateShiftDto[]) {
+  async create(createShiftDto: CreateShiftDto[], userID: number) {
     const res = await this.prisma.$transaction(
-      createShiftDto.map((dto) => this.prisma.shift.create({ data: dto })),
+      createShiftDto.map((dto) => this.prisma.shift.create({ data: {...dto, AppUser_Id: userID} })),
     );
 
     return res;
   }
 
-  async update(body: UpdateShiftDto[]) {
+  async update(body: UpdateShiftDto[], userID: number) {
     const res = await this.prisma.$transaction(
       body.map((dto) =>
         this.prisma.shift.update({
           where: { Id: dto.Id },
           data: {
             status: dto.status,
-            AppUser_Id: dto.AppUser_Id,
+            AppUser_Id: userID,
             updateDate: new Date(),
           },
         }),

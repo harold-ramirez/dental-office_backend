@@ -3,6 +3,7 @@ import { HabitsService } from './habits.service';
 import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('habits')
@@ -20,8 +21,8 @@ export class HabitsController {
   }
 
   @Post()
-  create(@Body() createHabitDto: CreateHabitDto) {
-    return this.habitsService.create(createHabitDto);
+  create(@Body() createHabitDto: CreateHabitDto, @User() user: JwtUser) {
+    return this.habitsService.create(createHabitDto, user.userID);
   }
 
   @Patch('/:id')

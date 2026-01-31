@@ -21,6 +21,11 @@ export class DiagnosedProcedureController {
     private readonly diagnosedProcedureService: DiagnosedProcedureService,
   ) {}
 
+  @Get('pending-payments')
+  pendingPayments() {
+    return this.diagnosedProcedureService.pendingPayments();
+  }
+
   @Get(':patientId/preview')
   preview(@Param('patientId') patientId: string) {
     return this.diagnosedProcedureService.preview(+patientId);

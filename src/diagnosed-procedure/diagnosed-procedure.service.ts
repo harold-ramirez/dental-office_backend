@@ -11,6 +11,68 @@ export class DiagnosedProcedureService {
     private encryption: EncryptionService,
   ) {}
 
+  async pendingPayments() {
+    const procedures = await this.prisma.diagnosedprocedure.findMany({
+      where: { status: true },
+      select: {
+        Id: true,
+        totalCost: true,
+        patient: {
+          select: {
+            name: true,
+            paternalSurname: true,
+            maternalSurname: true,
+          },
+        },
+        treatment: {
+          select: {
+            name: true,
+          },
+        },
+        payment: {
+          where: { status: true },
+          select: {
+            amount: true,
+          },
+        },
+      },
+    });
+
+    const pendingPayments = procedures
+      .map((procedure) => {
+        const totalPaid = procedure.payment.reduce(
+          (sum, payment) => sum + Number(payment.amount),
+          0,
+        );
+        const totalCost = Number(procedure.totalCost || 0);
+        const pendingAmount = totalCost - totalPaid;
+
+        if (pendingAmount > 0) {
+          const patientName = [
+            this.encryption.decrypt(procedure.patient.name),
+            procedure.patient.paternalSurname
+              ? this.encryption.decrypt(procedure.patient.paternalSurname)
+              : null,
+            procedure.patient.maternalSurname
+              ? this.encryption.decrypt(procedure.patient.maternalSurname)
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          return {
+            patientName,
+            treatment: procedure.treatment.name,
+            pendingAmount,
+          };
+        }
+        return null;
+      })
+      .filter((item) => item !== null);
+
+    return pendingPayments;
+  }
+
   async preview(patientId: number) {
     return await this.prisma.diagnosedprocedure.findMany({
       take: 5,

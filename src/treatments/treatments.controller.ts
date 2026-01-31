@@ -3,6 +3,7 @@ import { TreatmentsService } from './treatments.service';
 import { CreateTreatmentDto } from './dto/create-treatment.dto';
 import { UpdateTreatmentDto } from './dto/update-treatment.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('/treatments')
@@ -20,8 +21,8 @@ export class TreatmentsController {
   }
 
   @Post()
-  create(@Body() createTreatmentDto: CreateTreatmentDto) {
-    return this.treatmentsService.create(createTreatmentDto);
+  create(@Body() createTreatmentDto: CreateTreatmentDto, @User() user: JwtUser) {
+    return this.treatmentsService.create(createTreatmentDto, user.userID);
   }
 
   @Patch('/:id')

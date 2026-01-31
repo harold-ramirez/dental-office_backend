@@ -67,7 +67,7 @@ export class AuthService {
 
   async me(user: JwtUser) {
     return await this.prisma.appuser.findUnique({
-      where: { Id: user.userID },
+      where: { Id: user.userID, status: true },
       select: { Id: true, username: true },
     });
   }

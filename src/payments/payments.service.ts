@@ -71,9 +71,9 @@ export class PaymentsService {
     });
   }
 
-  async create(createPaymentDto: CreatePaymentDto) {
+  async create(createPaymentDto: CreatePaymentDto, userID: number) {
     await this.prisma.$transaction(async (tx) => {
-      await tx.payment.create({ data: createPaymentDto });
+      await tx.payment.create({ data: {...createPaymentDto, AppUser_Id: userID} });
 
       const { _sum } = await tx.payment.aggregate({
         where: {

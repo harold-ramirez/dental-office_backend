@@ -12,6 +12,7 @@ import { PersonalPathologiesService } from './personal-pathologies.service';
 import { CreatePersonalPathologyDto } from './dto/create-personal-pathology.dto';
 import { UpdatePersonalPathologyDto } from './dto/update-personal-pathology.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtUser, User } from 'src/auth/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('personal-pathologies')
@@ -31,8 +32,8 @@ export class PersonalPathologiesController {
   }
 
   @Post()
-  create(@Body() createPersonalPathologyDto: CreatePersonalPathologyDto) {
-    return this.personalPathologiesService.create(createPersonalPathologyDto);
+  create(@Body() createPersonalPathologyDto: CreatePersonalPathologyDto, @User() user: JwtUser) {
+    return this.personalPathologiesService.create(createPersonalPathologyDto, user.userID);
   }
 
   @Patch('/:id')

@@ -10,6 +10,7 @@ export class TreatmentsService {
   async findAll() {
     return this.prisma.treatment.findMany({
       where: { status: true },
+      orderBy: { name: 'asc' },
       select: {
         Id: true,
         name: true,
@@ -23,9 +24,9 @@ export class TreatmentsService {
     });
   }
 
-  async create(createTreatmentDto: CreateTreatmentDto) {
+  async create(createTreatmentDto: CreateTreatmentDto, userID: number) {
     return this.prisma.treatment.create({
-      data: createTreatmentDto,
+      data: { ...createTreatmentDto, AppUser_Id: userID },
     });
   }
 
