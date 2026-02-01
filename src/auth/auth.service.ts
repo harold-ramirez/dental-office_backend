@@ -65,10 +65,20 @@ export class AuthService {
     return data;
   }
 
-  async me(user: JwtUser) {
+  async validate(user: JwtUser) {
     return await this.prisma.appuser.findUnique({
       where: { Id: user.userID, status: true },
       select: { Id: true, username: true },
     });
+  }
+
+  async confirmPassword(password: string, userID: number) {
+    const dbUser = await this.prisma.appuser.findUnique({
+      where: { Id: userID, status: true },
+    });
+    if (!dbUser) throw new HttpException('USER_NOT_FOUND', 404);
+    const checkPassword = await compare(password, dbUser.password);
+    if (!checkPassword) throw new HttpException('PASSWORD_INCORRECT', 403);
+    return { confirmed: true };
   }
 }

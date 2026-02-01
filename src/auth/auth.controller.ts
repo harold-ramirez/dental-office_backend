@@ -21,7 +21,16 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('validate')
-  me(@User() user: JwtUser) {
-    return this.authService.me(user);
+  validate(@User() user: JwtUser) {
+    return this.authService.validate(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('confirm-password')
+  confirmPassword(
+    @Body() password: { password: string },
+    @User() user: JwtUser,
+  ) {
+    return this.authService.confirmPassword(password.password, user.userID);
   }
 }

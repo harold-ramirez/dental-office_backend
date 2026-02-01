@@ -1,12 +1,10 @@
 export class UpdateUserDto {
   username?: string;
-  password?: string;
+  phoneNumber?: string;
+  defaultMessage?: string;
+  sessionDurationMinutes: number;
   name?: string;
   paternalSurname?: string;
   maternalSurname?: string;
   gender?: string;
-  phoneNumber?: string;
-  defaultMessage?: string;
-  sessionDurationMinutes: number;
-  updateDate: Date | null;
 }

@@ -31,7 +31,14 @@ export class UsersService {
     };
   }
 
-  async update(id: number, body: UpdateUserDto, userID: number) {
+  async getWhatsappMessage(userID: number) {
+    return this.prisma.appuser.findUnique({
+      where: { Id: userID, status: true },
+      select: { defaultMessage: true },
+    });
+  }
+
+  async update(body: UpdateUserDto, userID: number) {
     const encrypted: any = {};
     // Estos campos se pueden limpiar con null
     if (body.name !== undefined) {
@@ -60,7 +67,7 @@ export class UsersService {
       encrypted.sessionDurationMinutes = body.sessionDurationMinutes;
 
     return this.prisma.appuser.update({
-      where: { Id: id, status: true },
+      where: { Id: userID, status: true },
       data: {
         ...encrypted,
         updateDate: new Date(),

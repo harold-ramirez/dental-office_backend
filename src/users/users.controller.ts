@@ -9,18 +9,22 @@ import { JwtUser, User } from 'src/auth/user.decorator';
 export class UsersController {
   constructor(private readonly service: UsersService) {}
 
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(+id);
+  @Get()
+  findOne(@User() user: JwtUser) {
+    return this.service.findOne(user.userID);
   }
 
-  @Patch('/:id')
+  @Get('wa-message')
+  getWhatsappMessage(@User() user: JwtUser) {
+    return this.service.getWhatsappMessage(user.userID);
+  }
+
+  @Patch()
   update(
-    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @User() user: JwtUser,
   ) {
-    return this.service.update(+id, updateUserDto, user.userID);
+    return this.service.update(updateUserDto, user.userID);
   }
 
   @Patch('/change-password')
