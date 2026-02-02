@@ -530,6 +530,26 @@ export class AppointmentsService {
   }
 
   async create(body: CreateAppointmentDto, userID: number) {
+    const start = new Date(body.dateHour);
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + body.minutesDuration);
+
+    const overlap = await this.prisma.appointment.findFirst({
+      where: {
+        status: true,
+        dateHour: { lt: end },
+      },
+      select: { Id: true, dateHour: true, minutesDuration: true },
+    });
+
+    if (overlap) {
+      const overlapEnd = new Date(overlap.dateHour);
+      overlapEnd.setMinutes(overlapEnd.getMinutes() + overlap.minutesDuration);
+      if (overlapEnd > start) {
+        throw new HttpException('Appointment overlaps another one', 409);
+      }
+    }
+
     return this.prisma.appointment.create({
       data: {
         ...body,
@@ -540,6 +560,29 @@ export class AppointmentsService {
   }
 
   async update(id: number, body: UpdateAppointmentDto, userID: number) {
+    const start = new Date(body.dateHour);
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + body.minutesDuration);
+
+    const overlaps = await this.prisma.appointment.findMany({
+      where: {
+        status: true,
+        Id: { not: id },
+        dateHour: { lt: end },
+      },
+      select: { Id: true, dateHour: true, minutesDuration: true },
+    });
+
+    const hasOverlap = overlaps.some((a) => {
+      const aEnd = new Date(a.dateHour);
+      aEnd.setMinutes(aEnd.getMinutes() + a.minutesDuration);
+      return aEnd > start;
+    });
+
+    if (hasOverlap) {
+      throw new HttpException('Appointment overlaps another one', 409);
+    }
+
     return this.prisma.appointment.update({
       where: { Id: id, status: true },
       data: {

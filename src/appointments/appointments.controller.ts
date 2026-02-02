@@ -55,11 +55,8 @@ export class AppointmentsController {
   }
 
   @Post()
-  create(
-    @Body() createAppointmentDto: CreateAppointmentDto,
-    @User() user: JwtUser,
-  ) {
-    return this.appointmentsService.create(createAppointmentDto, user.userID);
+  create(@Body() body: CreateAppointmentDto, @User() user: JwtUser) {
+    return this.appointmentsService.create(body, user.userID);
   }
 
   @Patch('/:id')
