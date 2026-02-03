@@ -152,6 +152,14 @@ export class AppointmentRequestsService {
     return { currentWeek, nextWeek };
   }
 
+  async getWaNumber() {
+    const waNumber = await this.prisma.appuser.findFirst({
+      orderBy: { registerDate: 'asc' },
+      select: { phoneNumber: true },
+    });
+    return waNumber?.phoneNumber;
+  }
+
   async create(request: CreateAppointmentRequestDto) {
     const encrypted = {
       ...request,

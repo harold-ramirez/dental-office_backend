@@ -533,8 +533,7 @@ export class AppointmentsService {
     const start = new Date(body.dateHour);
     const end = new Date(start);
     end.setMinutes(end.getMinutes() + body.minutesDuration);
-
-    const overlap = await this.prisma.appointment.findFirst({
+    const overlaps = await this.prisma.appointment.findMany({
       where: {
         status: true,
         dateHour: { lt: end },
@@ -542,12 +541,14 @@ export class AppointmentsService {
       select: { Id: true, dateHour: true, minutesDuration: true },
     });
 
-    if (overlap) {
-      const overlapEnd = new Date(overlap.dateHour);
-      overlapEnd.setMinutes(overlapEnd.getMinutes() + overlap.minutesDuration);
-      if (overlapEnd > start) {
-        throw new HttpException('Appointment overlaps another one', 409);
-      }
+    const hasOverlap = overlaps.some((a) => {
+      const aEnd = new Date(a.dateHour);
+      aEnd.setMinutes(aEnd.getMinutes() + a.minutesDuration);
+      return aEnd > start;
+    });
+
+    if (hasOverlap) {
+      throw new HttpException('Appointment overlaps another one', 409);
     }
 
     return this.prisma.appointment.create({

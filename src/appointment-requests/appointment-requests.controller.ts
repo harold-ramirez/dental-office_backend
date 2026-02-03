@@ -25,6 +25,12 @@ export class AppointmentRequestsController {
   }
 
   // Landing Page (no Auth)
+  @Get('/doctor-phoneNumber')
+  getWaNumber() {
+    return this.appointmentRequestsService.getWaNumber();
+  }
+
+  // Landing Page (no Auth)
   @Post()
   create(@Body() createAppointmentRequestDto: CreateAppointmentRequestDto) {
     return this.appointmentRequestsService.create(createAppointmentRequestDto);
