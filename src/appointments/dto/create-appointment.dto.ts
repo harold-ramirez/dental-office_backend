@@ -3,7 +3,7 @@ export class CreateAppointmentDto {
   AppointmentRequest_Id?: number;
   Treatment_Id?: number;
   notes: string | null;
-  Patient_Id: number;
+  Patient_Id: number | null;
   minutesDuration: number;
 }
 
@@ -11,7 +11,7 @@ export interface WeekScheduleDto {
   monday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     treatment: string | null;
@@ -22,7 +22,7 @@ export interface WeekScheduleDto {
   tuesday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;
@@ -32,7 +32,7 @@ export interface WeekScheduleDto {
   wednesday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;
@@ -42,7 +42,7 @@ export interface WeekScheduleDto {
   thursday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;
@@ -52,7 +52,7 @@ export interface WeekScheduleDto {
   friday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;
@@ -62,7 +62,7 @@ export interface WeekScheduleDto {
   saturday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;
@@ -72,7 +72,7 @@ export interface WeekScheduleDto {
   sunday: {
     Id: number;
     dateHour: Date;
-    patient: string;
+    patient: string | null;
     minutesDuration: number;
     notes: string | null;
     requestMessage: string | null;

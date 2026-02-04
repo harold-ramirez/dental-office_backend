@@ -35,8 +35,8 @@ export class PaymentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentsService.update(+id, updatePaymentDto);
+  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto, @User() user: JwtUser) {
+    return this.paymentsService.update(+id, updatePaymentDto, user.userID);
   }
 
   @Delete(':id')

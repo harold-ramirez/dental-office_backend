@@ -13,7 +13,7 @@ model appointment {
   notes                 String?             @db.VarChar(500)
   AppointmentRequest_Id Int?                @db.UnsignedMediumInt
   Treatment_Id          Int?                @db.UnsignedTinyInt
-  Patient_Id            Int                 @db.UnsignedMediumInt
+  Patient_Id            Int?                @db.UnsignedMediumInt
   minutesDuration       Int                 @db.TinyInt
   AppUser_Id            Int                 @db.UnsignedTinyInt
   registerDate          DateTime            @default(now()) @db.Timestamp(0)
@@ -21,7 +21,7 @@ model appointment {
   status                Boolean             @default(dbgenerated("b'1'")) @db.Bit(1)
   appuser               appuser             @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppUser1")
   appointmentrequest    appointmentrequest? @relation(fields: [AppointmentRequest_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_AppointmentRequest1")
-  patient               patient             @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Patient1")
+  patient               patient?            @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Patient1")
   treatment             treatment?          @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Appointment_Treatment1")
 
   @@index([AppUser_Id], map: "fk_Appointment_AppUser1_idx")
@@ -98,35 +98,24 @@ model complementaryimage {
 }
 
 model diagnosedprocedure {
-  Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  description              String?                    @db.VarChar(500)
-  totalCost                Decimal?                   @db.Decimal(7, 2)
-  Patient_Id               Int                        @db.UnsignedMediumInt
-  Treatment_Id             Int                        @db.UnsignedTinyInt
-  AppUser_Id               Int                        @db.UnsignedTinyInt
-  registerDate             DateTime                   @default(now()) @db.Timestamp(0)
-  updateDate               DateTime?                  @db.Timestamp(0)
-  status                   Boolean                    @default(dbgenerated("b'1'")) @db.Bit(1)
-  appuser                  appuser                    @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_AppUser1")
-  patient                  patient                    @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Patient1")
-  treatment                treatment                  @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Treatment1")
-  diagnosedprocedure_tooth diagnosedprocedure_tooth[]
-  payment                  payment[]
+  Id           Int       @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  description  String?   @db.VarChar(500)
+  totalCost    Decimal?  @db.Decimal(7, 2)
+  Patient_Id   Int       @db.UnsignedMediumInt
+  Treatment_Id Int       @db.UnsignedTinyInt
+  AppUser_Id   Int       @db.UnsignedTinyInt
+  registerDate DateTime  @default(now()) @db.Timestamp(0)
+  updateDate   DateTime? @db.Timestamp(0)
+  status       Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  dentalPieces String?   @db.VarChar(150)
+  appuser      appuser   @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_AppUser1")
+  patient      patient   @relation(fields: [Patient_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Patient1")
+  treatment    treatment @relation(fields: [Treatment_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_Treatment1")
+  payment      payment[]
 
   @@index([AppUser_Id], map: "fk_DiagnosedProcedure_AppUser1_idx")
   @@index([Patient_Id], map: "fk_DiagnosedProcedure_Patient1_idx")
   @@index([Treatment_Id], map: "fk_DiagnosedProcedure_Treatment1_idx")
-}
-
-model diagnosedprocedure_tooth {
-  DiagnosedProcedure_Id Int                @db.UnsignedInt
-  Tooth_Id              Int                @db.UnsignedInt
-  diagnosedprocedure    diagnosedprocedure @relation(fields: [DiagnosedProcedure_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_has_Tooth_DiagnosedProcedure1")
-  tooth                 tooth              @relation(fields: [Tooth_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DiagnosedProcedure_has_Tooth_Tooth1")
-
-  @@id([DiagnosedProcedure_Id, Tooth_Id])
-  @@index([DiagnosedProcedure_Id], map: "fk_DiagnosedProcedure_has_Tooth_DiagnosedProcedure1_idx")
-  @@index([Tooth_Id], map: "fk_DiagnosedProcedure_has_Tooth_Tooth1_idx")
 }
 
 model habits {
@@ -287,17 +276,16 @@ model shift {
 }
 
 model tooth {
-  Id                       Int                        @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
-  pieceNumber              Int?                       @db.TinyInt
-  localStatus              String?                    @default("white") @db.VarChar(45)
-  Odontogram_Id            Int                        @db.UnsignedMediumInt
-  AppUser_Id               Int                        @db.UnsignedTinyInt
-  registerDate             DateTime                   @default(now()) @db.Timestamp(0)
-  updateDate               DateTime?                  @db.Timestamp(0)
-  diagnosedprocedure_tooth diagnosedprocedure_tooth[]
-  appuser                  appuser                    @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_AppUser1")
-  odontogram               odontogram                 @relation(fields: [Odontogram_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_Odontogram1")
-  toothsection             toothsection[]
+  Id            Int            @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  pieceNumber   Int?           @db.TinyInt
+  localStatus   String?        @default("white") @db.VarChar(45)
+  Odontogram_Id Int            @db.UnsignedMediumInt
+  AppUser_Id    Int            @db.UnsignedTinyInt
+  registerDate  DateTime       @default(now()) @db.Timestamp(0)
+  updateDate    DateTime?      @db.Timestamp(0)
+  appuser       appuser        @relation(fields: [AppUser_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_AppUser1")
+  odontogram    odontogram     @relation(fields: [Odontogram_Id], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tooth_Odontogram1")
+  toothsection  toothsection[]
 
   @@index([AppUser_Id], map: "fk_Tooth_AppUser1_idx")
   @@index([Odontogram_Id], map: "fk_Tooth_Odontogram1_idx")

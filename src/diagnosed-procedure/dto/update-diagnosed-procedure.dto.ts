@@ -8,4 +8,5 @@ export class UpdateDiagnosedProcedureDto extends PartialType(
   totalCost?: number | null;
   Patient_Id: number;
   Treatment_Id: number;
+  dentalPieces?: string;
 }

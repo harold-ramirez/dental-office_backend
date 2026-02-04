@@ -148,7 +148,7 @@ export class AppointmentsService {
     const mapAppointmentToDto = (appointment) => ({
       dateHour: appointment.dateHour,
       minutesDuration: appointment.minutesDuration,
-      requestMessage: appointment.appointmentrequest.message
+      requestMessage: appointment.appointmentrequest?.message
         ? this.encryption.decrypt(appointment.appointmentrequest.message)
         : null,
       treatment: appointment.treatment?.name ?? null,
@@ -251,6 +251,7 @@ export class AppointmentsService {
           select: {
             message: true,
             phoneNumber: true,
+            patientFullName: true,
           },
         },
         patient: {
@@ -271,7 +272,7 @@ export class AppointmentsService {
         dateHour: appointment.dateHour,
         treatment: appointment.treatment?.name ?? null,
         treatmentID: appointment.treatment?.Id ?? null,
-        patientID: appointment.patient.Id,
+        patientID: appointment.patient?.Id,
         minutesDuration: appointment.minutesDuration,
         notes: appointment.notes
           ? this.encryption.decrypt(appointment.notes)
@@ -282,20 +283,26 @@ export class AppointmentsService {
         requestPhoneNumber: appointment.appointmentrequest?.phoneNumber
           ? this.encryption.decrypt(appointment.appointmentrequest.phoneNumber)
           : null,
-        patientPhoneNumber: appointment.patient.cellphoneNumber
+        patientPhoneNumber: appointment.patient?.cellphoneNumber
           ? this.encryption.decrypt(appointment.patient.cellphoneNumber)
           : null,
-        patient: [
-          this.encryption.decrypt(appointment.patient.name),
-          appointment.patient.paternalSurname
-            ? this.encryption.decrypt(appointment.patient.paternalSurname)
+        patient: appointment.patient
+          ? [
+              this.encryption.decrypt(appointment.patient.name),
+              appointment.patient.paternalSurname
+                ? this.encryption.decrypt(appointment.patient.paternalSurname)
+                : null,
+              appointment.patient.maternalSurname
+                ? this.encryption.decrypt(appointment.patient.maternalSurname)
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' ')
+          : appointment.appointmentrequest?.patientFullName
+            ? this.encryption.decrypt(
+                appointment.appointmentrequest.patientFullName,
+              )
             : null,
-          appointment.patient.maternalSurname
-            ? this.encryption.decrypt(appointment.patient.maternalSurname)
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' '),
       });
     }
     return dto;
@@ -334,8 +341,11 @@ export class AppointmentsService {
         },
         appointmentrequest: {
           select: {
+            Id: true,
             message: true,
             phoneNumber: true,
+            patientFullName: true,
+            registerDate: true,
           },
         },
         patient: {
@@ -367,29 +377,39 @@ export class AppointmentsService {
       const dto = {
         Id: appointment.Id,
         dateHour: appointment.dateHour,
+        requestID: appointment.appointmentrequest?.Id ?? null,
+        requestRegisterDate: appointment.appointmentrequest?.registerDate ?? null,
         minutesDuration: appointment.minutesDuration,
         notes: appointment.notes
           ? this.encryption.decrypt(appointment.notes)
           : null,
         treatment: appointment.treatment?.name ?? null,
         treatmentID: appointment.treatment?.Id ?? null,
-        requestMessage: appointment.appointmentrequest?.message ?? null,
+        requestMessage: appointment.appointmentrequest?.message
+          ? this.encryption.decrypt(appointment.appointmentrequest.message)
+          : null,
         requestPhoneNumber: appointment.appointmentrequest?.phoneNumber ?? null,
-        patientID: appointment.patient.Id,
-        patientPhoneNumber: appointment.patient.cellphoneNumber
+        patientID: appointment.patient?.Id,
+        patientPhoneNumber: appointment.patient?.cellphoneNumber
           ? this.encryption.decrypt(appointment.patient.cellphoneNumber)
           : null,
-        patient: [
-          this.encryption.decrypt(appointment.patient.name),
-          appointment.patient.paternalSurname
-            ? this.encryption.decrypt(appointment.patient.paternalSurname)
+        patient: appointment.patient
+          ? [
+              this.encryption.decrypt(appointment.patient.name),
+              appointment.patient.paternalSurname
+                ? this.encryption.decrypt(appointment.patient.paternalSurname)
+                : null,
+              appointment.patient.maternalSurname
+                ? this.encryption.decrypt(appointment.patient.maternalSurname)
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' ')
+          : appointment.appointmentrequest?.patientFullName
+            ? this.encryption.decrypt(
+                appointment.appointmentrequest.patientFullName,
+              )
             : null,
-          appointment.patient.maternalSurname
-            ? this.encryption.decrypt(appointment.patient.maternalSurname)
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' '),
       };
 
       switch (appointmentDay) {
@@ -478,6 +498,7 @@ export class AppointmentsService {
         appointmentrequest: {
           select: {
             Id: true,
+            patientFullName: true,
             dateHourRequest: true,
             message: true,
             registerDate: true,
@@ -504,19 +525,27 @@ export class AppointmentsService {
     if (!dbAppointment) throw new HttpException('Appointment not found', 404);
     return {
       ...dbAppointment,
-      patient: {
-        Id: dbAppointment.patient.Id,
-        name: this.encryption.decrypt(dbAppointment.patient.name),
-        paternalSurname: dbAppointment.patient.paternalSurname
-          ? this.encryption.decrypt(dbAppointment.patient.paternalSurname)
+      cellPhoneNumber: dbAppointment.patient?.cellphoneNumber
+        ? this.encryption.decrypt(dbAppointment.patient.cellphoneNumber)
+        : null,
+      patientID: dbAppointment.patient?.Id,
+      patientName: dbAppointment.patient
+        ? [
+            this.encryption.decrypt(dbAppointment.patient.name),
+            dbAppointment.patient.paternalSurname
+              ? this.encryption.decrypt(dbAppointment.patient.paternalSurname)
+              : null,
+            dbAppointment.patient.maternalSurname
+              ? this.encryption.decrypt(dbAppointment.patient.maternalSurname)
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' ')
+        : dbAppointment.appointmentrequest
+          ? this.encryption.decrypt(
+              dbAppointment.appointmentrequest.patientFullName,
+            )
           : null,
-        maternalSurname: dbAppointment.patient.maternalSurname
-          ? this.encryption.decrypt(dbAppointment.patient.maternalSurname)
-          : null,
-        cellphoneNumber: dbAppointment.patient.cellphoneNumber
-          ? this.encryption.decrypt(dbAppointment.patient.cellphoneNumber)
-          : null,
-      },
       appointmentrequest: {
         ...dbAppointment.appointmentrequest,
         message: dbAppointment.appointmentrequest?.message
@@ -550,14 +579,28 @@ export class AppointmentsService {
     if (hasOverlap) {
       throw new HttpException('Appointment overlaps another one', 409);
     }
-
-    return this.prisma.appointment.create({
-      data: {
-        ...body,
-        AppUser_Id: userID,
-        notes: body.notes ? this.encryption.encrypt(body.notes) : null,
-      },
+    const created = await this.prisma.$transaction(async (tx) => {
+      if (body.AppointmentRequest_Id) {
+        await tx.appointmentrequest.update({
+          where: { Id: body.AppointmentRequest_Id, status: true },
+          data: {
+            status: false,
+            updateDate: new Date(),
+            AppUser_Id: userID,
+          },
+        });
+      }
+      const created = await tx.appointment.create({
+        data: {
+          ...body,
+          AppUser_Id: userID,
+          notes: body.notes ? this.encryption.encrypt(body.notes) : null,
+        },
+      });
+      return created;
     });
+
+    return created;
   }
 
   async update(id: number, body: UpdateAppointmentDto, userID: number) {

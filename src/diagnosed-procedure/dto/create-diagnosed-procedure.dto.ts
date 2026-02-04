@@ -3,5 +3,5 @@ export class CreateDiagnosedProcedureDto {
   totalCost: number | null;
   Patient_Id: number;
   Treatment_Id: number;
-  dentalPieces: number[];
+  dentalPieces: string;
 }

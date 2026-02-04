@@ -110,16 +110,7 @@ export class DiagnosedProcedureService {
         },
         registerDate: true,
         updateDate: true,
-        diagnosedprocedure_tooth: {
-          select: {
-            tooth: {
-              select: {
-                Id: true,
-                pieceNumber: true,
-              },
-            },
-          },
-        },
+        dentalPieces: true,
       },
     });
     return await data.map((item) => ({
@@ -133,7 +124,7 @@ export class DiagnosedProcedureService {
         name: item.treatment.name,
         description: item.treatment.description,
       },
-      totalPieces: item.diagnosedprocedure_tooth.length,
+      dentalPieces: item.dentalPieces?.split('-').length ?? 0,
       registerDate: item.registerDate,
       updateDate: item.updateDate,
     }));
@@ -153,35 +144,17 @@ export class DiagnosedProcedureService {
   }
 
   async create(body: CreateDiagnosedProcedureDto, userID: number) {
-    return await this.prisma.$transaction(async (tx) => {
-      const createdProcedure = await tx.diagnosedprocedure.create({
-        data: {
-          description: body.description
-            ? this.encryption.encrypt(body.description)
-            : null,
-          totalCost: body.totalCost,
-          Patient_Id: body.Patient_Id,
-          Treatment_Id: body.Treatment_Id,
-          AppUser_Id: userID,
-        },
-      });
-
-      const uniqueToothIds = Array.from(new Set(body.dentalPieces ?? []));
-      const links = await Promise.all(
-        uniqueToothIds.map((toothId) =>
-          tx.diagnosedprocedure_tooth.create({
-            data: {
-              DiagnosedProcedure_Id: createdProcedure.Id,
-              Tooth_Id: toothId,
-            },
-          }),
-        ),
-      );
-
-      return {
-        ...createdProcedure,
-        totalPieces: links.length,
-      };
+    return await this.prisma.diagnosedprocedure.create({
+      data: {
+        description: body.description
+          ? this.encryption.encrypt(body.description)
+          : null,
+        dentalPieces: body.dentalPieces,
+        totalCost: body.totalCost,
+        Patient_Id: body.Patient_Id,
+        Treatment_Id: body.Treatment_Id,
+        AppUser_Id: userID,
+      },
     });
   }
 

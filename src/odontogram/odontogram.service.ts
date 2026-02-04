@@ -7,20 +7,20 @@ import { PrismaService } from 'src/prisma.service';
 export class OdontogramService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllTeeth(patientId: number) {
-    const form = await this.prisma.medicalhistoryform.findFirst({
-      where: { Patient_Id: patientId, status: true },
-      orderBy: { registerDate: 'desc' },
-      select: { Id: true },
-    });
-    return await this.prisma.tooth.findMany({
-      where: { Odontogram_Id: form?.Id },
-      select: {
-        Id: true,
-        pieceNumber: true,
-      },
-    });
-  }
+  // async getAllTeeth(patientId: number) {
+  //   const form = await this.prisma.medicalhistoryform.findFirst({
+  //     where: { Patient_Id: patientId, status: true },
+  //     orderBy: { registerDate: 'desc' },
+  //     select: { Id: true },
+  //   });
+  //   return await this.prisma.tooth.findMany({
+  //     where: { Odontogram_Id: form?.Id },
+  //     select: {
+  //       Id: true,
+  //       pieceNumber: true,
+  //     },
+  //   });
+  // }
 
   create(createOdontogramDto: CreateOdontogramDto) {
     return 'This action adds a new odontogram';

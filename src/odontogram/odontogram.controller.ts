@@ -9,10 +9,10 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class OdontogramController {
   constructor(private readonly odontogramService: OdontogramService) {}
   
-  @Get(':patientId/teeth')
-  getAllTeeth(@Param('patientId') patientId: string) {
-    return this.odontogramService.getAllTeeth(+patientId);
-  }
+  // @Get(':patientId/teeth')
+  // getAllTeeth(@Param('patientId') patientId: string) {
+  //   return this.odontogramService.getAllTeeth(+patientId);
+  // }
   
   @Get()
   findAll() {

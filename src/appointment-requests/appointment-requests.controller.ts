@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Delete,
   Param,
   UseGuards,
 } from '@nestjs/common';
@@ -32,8 +32,8 @@ export class AppointmentRequestsController {
 
   // Landing Page (no Auth)
   @Post()
-  create(@Body() createAppointmentRequestDto: CreateAppointmentRequestDto) {
-    return this.appointmentRequestsService.create(createAppointmentRequestDto);
+  sendRequest(@Body() createAppointmentRequestDto: CreateAppointmentRequestDto) {
+    return this.appointmentRequestsService.sendRequest(createAppointmentRequestDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -55,8 +55,8 @@ export class AppointmentRequestsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('/:id')
-  markAsRead(@Param('id') id: string, @User() user: JwtUser) {
-    return this.appointmentRequestsService.markAsRead(+id, user.userID);
+  @Delete('/:id')
+  denyRequest(@Param('id') id: string, @User() user: JwtUser) {
+    return this.appointmentRequestsService.denyRequest(+id, user.userID);
   }
 }

@@ -160,7 +160,7 @@ export class AppointmentRequestsService {
     return waNumber?.phoneNumber;
   }
 
-  async create(request: CreateAppointmentRequestDto) {
+  async sendRequest(request: CreateAppointmentRequestDto) {
     const encrypted = {
       ...request,
       patientFullName: this.encryption.encrypt(request.patientFullName),
@@ -260,7 +260,7 @@ export class AppointmentRequestsService {
     };
   }
 
-  async markAsRead(id: number, userID: number) {
+  async denyRequest(id: number, userID: number) {
     const updated = await this.prisma.appointmentrequest.update({
       where: { Id: id, status: true },
       data: {
@@ -269,11 +269,6 @@ export class AppointmentRequestsService {
         AppUser_Id: userID,
       },
     });
-    // await this.appointmentsService.create(appointmentData);
     return updated;
   }
-
-  // confirmar -> status=false && create appointment
-  // reprogramar -> create appointment && status=false
-  // rechazar -> status=false
 }
