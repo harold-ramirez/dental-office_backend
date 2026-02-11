@@ -68,8 +68,10 @@ export class PaymentsService {
   }
 
   async create(body: CreatePaymentDto, userID: number) {
-    await this.prisma.$transaction(async (tx) => {
-      await tx.payment.create({ data: { ...body, AppUser_Id: userID } });
+    return await this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.create({
+        data: { ...body, AppUser_Id: userID },
+      });
 
       const { _sum } = await tx.payment.aggregate({
         where: {
@@ -78,16 +80,20 @@ export class PaymentsService {
         },
         _sum: { amount: true },
       });
+
       const procedure = await tx.diagnosedprocedure.findUnique({
         where: { Id: body.DiagnosedProcedure_Id, status: true },
         select: { totalCost: true },
       });
+
       if (Number(_sum.amount ?? 0) >= Number(procedure?.totalCost ?? 0)) {
         await tx.diagnosedprocedure.update({
           where: { Id: body.DiagnosedProcedure_Id, status: true },
           data: { updateDate: new Date() },
         });
       }
+
+      return payment;
     });
   }
 

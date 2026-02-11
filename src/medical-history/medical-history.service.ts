@@ -3,6 +3,10 @@ import { CreateMedicalHistoryDto } from './dto/create-medical-history.dto';
 // import { UpdateMedicalHistoryDto } from './dto/update-medical-history.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import {
+  adultTeethMapping,
+  childTeethMapping,
+} from 'src/utils/tooth-definitions';
 
 @Injectable()
 export class MedicalHistoryService {
@@ -254,49 +258,29 @@ export class MedicalHistoryService {
       });
 
       const isAdult: boolean = odontogram.model === 'adult';
-
-      // Teeth
-      const minTeethNumber = isAdult ? 1 : 5;
-      const maxTeethNumber = isAdult ? 8 : 5;
-      const teethToCreate: any[] = [];
-      for (let i = minTeethNumber; i <= minTeethNumber + 3; i++) {
-        for (let j = 1; j <= maxTeethNumber; j++) {
-          teethToCreate.push({
-            pieceNumber: i * 10 + j,
-            Odontogram_Id: odontogram.Id,
-            AppUser_Id: odontogram.AppUser_Id,
-          });
-        }
-      }
-      const createdTeeth = await Promise.all(
-        teethToCreate.map((tooth) => tx.tooth.create({ data: tooth })),
-      );
-
-      // Tooth Sections
-      const piecesPerTooth = isAdult
-        ? [5, 5, 5, 6, 6, 8, 8, 8]
-        : [5, 5, 5, 8, 8];
-
-      const teethPerQuadrant = isAdult ? 8 : 5;
-      const quadrants = 4;
+      const teethMapping = isAdult ? adultTeethMapping : childTeethMapping;
 
       await Promise.all(
-        Array.from({ length: quadrants }).flatMap((_, quadrantIndex) =>
-          createdTeeth
-            .slice(
-              quadrantIndex * teethPerQuadrant,
-              (quadrantIndex + 1) * teethPerQuadrant,
-            )
-            .flatMap((tooth, toothIndex) =>
-              Array.from({ length: piecesPerTooth[toothIndex] }).map(() =>
-                tx.toothsection.create({
-                  data: {
-                    Tooth_Id: tooth.Id,
-                  },
-                }),
-              ),
+        Object.entries(teethMapping).map(async ([pieceNumber, sections]) => {
+          const tooth = await tx.tooth.create({
+            data: {
+              pieceNumber: parseInt(pieceNumber),
+              Odontogram_Id: odontogram.Id,
+              AppUser_Id: odontogram.AppUser_Id,
+            },
+          });
+
+          await Promise.all(
+            sections.map((sectionName) =>
+              tx.toothsection.create({
+                data: {
+                  name: sectionName,
+                  Tooth_Id: tooth.Id,
+                },
+              }),
             ),
-        ),
+          );
+        }),
       );
 
       return {
