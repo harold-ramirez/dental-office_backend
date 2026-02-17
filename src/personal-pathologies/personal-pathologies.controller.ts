@@ -13,8 +13,9 @@ import { CreatePersonalPathologyDto } from './dto/create-personal-pathology.dto'
 import { UpdatePersonalPathologyDto } from './dto/update-personal-pathology.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtUser, User } from 'src/auth/user.decorator';
+import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, UserThrottlerGuard)
 @Controller('personal-pathologies')
 export class PersonalPathologiesController {
   constructor(

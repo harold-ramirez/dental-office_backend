@@ -4,8 +4,9 @@ import { CreateTreatmentDto } from './dto/create-treatment.dto';
 import { UpdateTreatmentDto } from './dto/update-treatment.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtUser, User } from 'src/auth/user.decorator';
+import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, UserThrottlerGuard)
 @Controller('/treatments')
 export class TreatmentsController {
   constructor(private readonly treatmentsService: TreatmentsService) {}

@@ -13,8 +13,9 @@ import { CreateDiagnosedProcedureDto } from './dto/create-diagnosed-procedure.dt
 import { UpdateDiagnosedProcedureDto } from './dto/update-diagnosed-procedure.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtUser, User } from 'src/auth/user.decorator';
+import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, UserThrottlerGuard)
 @Controller('diagnosed-procedure')
 export class DiagnosedProcedureController {
   constructor(

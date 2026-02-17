@@ -2,8 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { OdontogramService } from './odontogram.service';
 import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, UserThrottlerGuard)
 @Controller('odontograms')
 export class OdontogramController {
   constructor(private readonly odontogramService: OdontogramService) {}

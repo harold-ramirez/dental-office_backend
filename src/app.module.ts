@@ -10,9 +10,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentRequestsModule } from './appointment-requests/appointment-requests.module';
 import { ImagesModule } from './images/images.module';
 import { MulterModule } from '@nestjs/platform-express';
-// import { ServeStaticModule } from '@nestjs/serve-static';
 import { GatewayModule } from './websocket/websocket.module';
-// import { join } from 'path';
 import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-procedure.module';
 import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
@@ -20,6 +18,10 @@ import { OdontogramModule } from './odontogram/odontogram.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionService } from './utils/encryption.service';
 import { PrismaModule } from './prisma.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+// import { ServeStaticModule } from '@nestjs/serve-static';
+// import { join } from 'path';
 
 @Module({
   imports: [
@@ -29,6 +31,9 @@ import { PrismaModule } from './prisma.module';
     PrismaModule,
     MulterModule.register({
       dest: './uploads',
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60, limit: 120 }],
     }),
     // ServeStaticModule.forRoot({
     //   rootPath: join(__dirname, '..', 'uploads'),
@@ -50,7 +55,10 @@ import { PrismaModule } from './prisma.module';
     OdontogramModule,
     AuthModule,
   ],
-  providers: [EncryptionService],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    EncryptionService,
+  ],
   exports: [EncryptionService],
 })
 export class AppModule {}
