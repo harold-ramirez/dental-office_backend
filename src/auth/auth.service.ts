@@ -6,6 +6,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/utils/encryption.service';
 import { JwtUser } from 'src/auth/user.decorator';
+import { shifts } from 'src/utils/default-shifts';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,7 @@ export class AuthService {
     const userCount = await this.prisma.appuser.count({
       where: { status: true },
     });
-    if (userCount >= 2)
+    if (userCount >= 1)
       throw new HttpException('REGISTRATION_LIMIT_REACHED', 403);
 
     const { password } = body;
@@ -36,10 +37,21 @@ export class AuthService {
       phoneNumber: this.encryption.encrypt(body.phoneNumber),
       password: hashedPassword,
     };
-
-    return await this.prisma.appuser.create({
-      data: body,
+    const created = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.appuser.create({
+        data: body,
+      });
+      shifts.map(async (shift) => {
+        await tx.shift.create({
+          data: {
+            ...shift,
+            AppUser_Id: user.Id,
+          },
+        });
+      });
+      return user;
     });
+    return created;
   }
 
   async login(body: LoginAuthDto) {

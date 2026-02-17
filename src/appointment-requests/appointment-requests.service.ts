@@ -1,30 +1,29 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateAppointmentRequestDto } from './dto/create-appointment-request.dto';
 import { PrismaService } from 'src/prisma.service';
-import { AppointmentsService } from 'src/appointments/appointments.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcDate, utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class AppointmentRequestsService {
   constructor(
     private prisma: PrismaService,
-    private appointmentsService: AppointmentsService,
     private encryption: EncryptionService,
   ) {}
 
   async getLandingCalendar() {
-    const now = new Date();
-    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1; // Monday=0
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - dayOfWeek);
-    monday.setHours(0, 0, 0, 0);
+    const now = utcNow();
+    const dayOfWeek = now.getUTCDay() === 0 ? 6 : now.getUTCDay() - 1; // Monday=0
+    const monday = utcDate(now);
+    monday.setUTCDate(now.getUTCDate() - dayOfWeek);
+    monday.setUTCHours(0, 0, 0, 0);
 
-    const nextMonday = new Date(monday);
-    nextMonday.setDate(monday.getDate() + 7);
+    const nextMonday = utcDate(monday);
+    nextMonday.setUTCDate(monday.getUTCDate() + 7);
 
-    const endNextSunday = new Date(nextMonday);
-    endNextSunday.setDate(nextMonday.getDate() + 6);
-    endNextSunday.setHours(23, 59, 59, 999);
+    const endNextSunday = utcDate(nextMonday);
+    endNextSunday.setUTCDate(nextMonday.getUTCDate() + 6);
+    endNextSunday.setUTCHours(23, 59, 59, 999);
 
     const [shifts, appointments] = await Promise.all([
       this.prisma.shift.findMany({
@@ -76,14 +75,14 @@ export class AppointmentRequestsService {
         const index = dbDayToIndex[shift.day];
         if (index === undefined) continue;
 
-        const dayDate = new Date(weekStart);
-        dayDate.setDate(weekStart.getDate() + index);
+        const dayDate = utcDate(weekStart);
+        dayDate.setUTCDate(weekStart.getUTCDate() + index);
 
-        const h = shift.hour.getHours();
-        const m = shift.hour.getMinutes();
+        const h = shift.hour.getUTCHours();
+        const m = shift.hour.getUTCMinutes();
 
-        const slotStart = new Date(dayDate);
-        slotStart.setHours(h, m, 0, 0);
+        const slotStart = utcDate(dayDate);
+        slotStart.setUTCHours(h, m, 0, 0);
 
         schedule[dayKeys[index]].push({
           dateHour: slotStart,
@@ -104,26 +103,27 @@ export class AppointmentRequestsService {
       weekStart: Date,
       weekSchedule: ReturnType<typeof initWeek>,
     ) => {
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
+      const weekEnd = utcDate(weekStart);
+      weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+      weekEnd.setUTCHours(23, 59, 59, 999);
 
       const weekAppointments = appointments.filter(
         (a) => a.dateHour >= weekStart && a.dateHour <= weekEnd,
       );
 
       for (const a of weekAppointments) {
-        const apptStart = new Date(a.dateHour);
-        const apptEnd = new Date(apptStart);
-        apptEnd.setMinutes(apptEnd.getMinutes() + a.minutesDuration);
+        const apptStart = utcDate(a.dateHour);
+        const apptEnd = utcDate(apptStart);
+        apptEnd.setUTCMinutes(apptEnd.getUTCMinutes() + a.minutesDuration);
 
-        const dayIndex = apptStart.getDay() === 0 ? 6 : apptStart.getDay() - 1;
+        const dayIndex =
+          apptStart.getUTCDay() === 0 ? 6 : apptStart.getUTCDay() - 1;
         const key = dayKeys[dayIndex];
 
         for (const slot of weekSchedule[key]) {
-          const slotStart = new Date(slot.dateHour);
-          const slotEnd = new Date(slotStart);
-          slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+          const slotStart = utcDate(slot.dateHour);
+          const slotEnd = utcDate(slotStart);
+          slotEnd.setUTCMinutes(slotEnd.getUTCMinutes() + 30);
 
           if (slotStart < apptEnd && slotEnd > apptStart) {
             slot.status = false;
@@ -161,6 +161,43 @@ export class AppointmentRequestsService {
   }
 
   async sendRequest(request: CreateAppointmentRequestDto) {
+    const requestedDate = utcDate(request.dateHourRequest);
+    const requestedEnd = utcDate(requestedDate);
+    requestedEnd.setUTCMinutes(requestedEnd.getUTCMinutes() + 30); // slots de 30min
+
+    // Verificar si ya existe una cita en ese horario
+    const overlappingAppointment = await this.prisma.appointment.findFirst({
+      where: {
+        status: true,
+        dateHour: {
+          lt: requestedEnd,
+        },
+      },
+      select: { dateHour: true, minutesDuration: true },
+    });
+
+    if (overlappingAppointment) {
+      const apptEnd = utcDate(overlappingAppointment.dateHour);
+      apptEnd.setUTCMinutes(
+        apptEnd.getUTCMinutes() + overlappingAppointment.minutesDuration,
+      );
+      if (apptEnd > requestedDate) {
+        throw new HttpException('Slot not available', 409);
+      }
+    }
+
+    // Verificar si ya existe una solicitud pendiente en ese horario
+    const existingRequest = await this.prisma.appointmentrequest.findFirst({
+      where: {
+        dateHourRequest: request.dateHourRequest,
+        status: true,
+      },
+    });
+
+    if (existingRequest) {
+      throw new HttpException('Request already exists for this slot', 409);
+    }
+
     const encrypted = {
       ...request,
       patientFullName: this.encryption.encrypt(request.patientFullName),
@@ -265,7 +302,7 @@ export class AppointmentRequestsService {
       where: { Id: id, status: true },
       data: {
         status: false,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });

@@ -3,6 +3,7 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class PatientsService {
@@ -253,7 +254,7 @@ export class PatientsService {
       where: { Id: id, status: true },
       data: {
         ...encrypted,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });
@@ -262,7 +263,7 @@ export class PatientsService {
   async softDelete(id: number, userID: number) {
     return this.prisma.patient.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date(), AppUser_Id: userID },
+      data: { status: false, updateDate: utcNow(), AppUser_Id: userID },
     });
   }
 }

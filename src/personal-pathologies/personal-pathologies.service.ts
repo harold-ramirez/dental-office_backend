@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePersonalPathologyDto } from './dto/create-personal-pathology.dto';
 import { UpdatePersonalPathologyDto } from './dto/update-personal-pathology.dto';
 import { PrismaService } from 'src/prisma.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class PersonalPathologiesService {
@@ -24,9 +25,12 @@ export class PersonalPathologiesService {
     });
   }
 
-  async create(createPersonalPathologyDto: CreatePersonalPathologyDto, userID: number) {
+  async create(
+    createPersonalPathologyDto: CreatePersonalPathologyDto,
+    userID: number,
+  ) {
     return this.prisma.personalpathologicalhistory.create({
-      data: {...createPersonalPathologyDto, AppUser_Id: userID},
+      data: { ...createPersonalPathologyDto, AppUser_Id: userID },
     });
   }
 
@@ -38,7 +42,7 @@ export class PersonalPathologiesService {
       where: { Id: id, status: true },
       data: {
         ...updatePersonalPathologyDto,
-        updateDate: new Date(),
+        updateDate: utcNow(),
       },
     });
   }
@@ -46,7 +50,7 @@ export class PersonalPathologiesService {
   async softDelete(id: number) {
     return this.prisma.personalpathologicalhistory.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: utcNow() },
     });
   }
 }

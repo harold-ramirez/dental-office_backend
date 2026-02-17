@@ -6,6 +6,7 @@ import {
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcDate, utcFromParts, utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class AppointmentsService {
@@ -15,26 +16,26 @@ export class AppointmentsService {
   ) {}
 
   async summary() {
-    const now = new Date();
+    const now = utcNow();
     // Today
-    const startOfToday = new Date(now);
-    startOfToday.setHours(0, 0, 0, 0);
-    const endOfToday = new Date(now);
-    endOfToday.setHours(23, 59, 59, 999);
+    const startOfToday = utcDate(now);
+    startOfToday.setUTCHours(0, 0, 0, 0);
+    const endOfToday = utcDate(now);
+    endOfToday.setUTCHours(23, 59, 59, 999);
     // Tomorrow
-    const startOfTomorrow = new Date(now);
-    startOfTomorrow.setDate(now.getDate() + 1);
-    startOfTomorrow.setHours(0, 0, 0, 0);
-    const endOfTomorrow = new Date(startOfTomorrow);
-    endOfTomorrow.setHours(23, 59, 59, 999);
+    const startOfTomorrow = utcDate(now);
+    startOfTomorrow.setUTCDate(now.getUTCDate() + 1);
+    startOfTomorrow.setUTCHours(0, 0, 0, 0);
+    const endOfTomorrow = utcDate(startOfTomorrow);
+    endOfTomorrow.setUTCHours(23, 59, 59, 999);
     // Current Week
-    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - dayOfWeek);
-    monday.setHours(0, 0, 0, 0);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    const dayOfWeek = now.getUTCDay() === 0 ? 6 : now.getUTCDay() - 1;
+    const monday = utcDate(now);
+    monday.setUTCDate(now.getUTCDate() - dayOfWeek);
+    monday.setUTCHours(0, 0, 0, 0);
+    const sunday = utcDate(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
 
     const [
       todayCount,
@@ -80,7 +81,7 @@ export class AppointmentsService {
     const daysCountArray = [0, 0, 0, 0, 0, 0, 0]; // [Sunday, Monday, ..., Saturday]
 
     weekAppointments.forEach((appointment) => {
-      const dayIndex = appointment.dateHour.getDay();
+      const dayIndex = appointment.dateHour.getUTCDay();
       daysCountArray[dayIndex]++;
     });
 
@@ -118,26 +119,34 @@ export class AppointmentsService {
   }
 
   async history(patientId: number) {
-    const now = new Date();
-    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfCurrentMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
+    const now = utcNow();
+    const startOfCurrentMonth = utcFromParts(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      1,
+    );
+    const lastMonthDate = utcFromParts(
+      now.getUTCFullYear(),
+      now.getUTCMonth() - 1,
+      1,
+    );
+    const endOfCurrentMonth = utcFromParts(
+      now.getUTCFullYear(),
+      now.getUTCMonth() + 1,
       0,
       23,
       59,
       59,
       999,
     );
-    const startOfLastMonth = new Date(
-      lastMonthDate.getFullYear(),
-      lastMonthDate.getMonth(),
+    const startOfLastMonth = utcFromParts(
+      lastMonthDate.getUTCFullYear(),
+      lastMonthDate.getUTCMonth(),
       1,
     );
-    const endOfLastMonth = new Date(
-      lastMonthDate.getFullYear(),
-      lastMonthDate.getMonth() + 1,
+    const endOfLastMonth = utcFromParts(
+      lastMonthDate.getUTCFullYear(),
+      lastMonthDate.getUTCMonth() + 1,
       0,
       23,
       59,
@@ -224,8 +233,8 @@ export class AppointmentsService {
 
   async findAllDay(date: string) {
     const day = date.split('T')[0];
-    const start = new Date(day + 'T00:00:00');
-    const end = new Date(day + 'T23:59:59.999');
+    const start = utcDate(day + 'T00:00:00Z');
+    const end = utcDate(day + 'T23:59:59.999Z');
 
     const appointments = await this.prisma.appointment.findMany({
       orderBy: { dateHour: 'asc' },
@@ -309,15 +318,15 @@ export class AppointmentsService {
   }
 
   async findAllWeek() {
-    const now = new Date();
-    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - dayOfWeek);
-    monday.setHours(0, 0, 0, 0);
+    const now = utcNow();
+    const dayOfWeek = now.getUTCDay() === 0 ? 6 : now.getUTCDay() - 1;
+    const monday = utcDate(now);
+    monday.setUTCDate(now.getUTCDate() - dayOfWeek);
+    monday.setUTCHours(0, 0, 0, 0);
 
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    const sunday = utcDate(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
 
     const data = await this.prisma.appointment.findMany({
       orderBy: { dateHour: 'asc' },
@@ -373,12 +382,13 @@ export class AppointmentsService {
 
     // Mapear cada appointment al día correspondiente
     data.forEach((appointment) => {
-      const appointmentDay = appointment.dateHour.getDay();
+      const appointmentDay = appointment.dateHour.getUTCDay();
       const dto = {
         Id: appointment.Id,
         dateHour: appointment.dateHour,
         requestID: appointment.appointmentrequest?.Id ?? null,
-        requestRegisterDate: appointment.appointmentrequest?.registerDate ?? null,
+        requestRegisterDate:
+          appointment.appointmentrequest?.registerDate ?? null,
         minutesDuration: appointment.minutesDuration,
         notes: appointment.notes
           ? this.encryption.decrypt(appointment.notes)
@@ -441,12 +451,12 @@ export class AppointmentsService {
   }
 
   async findAllMonth() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
+    const now = utcNow();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth();
 
-    const start = new Date(year, month, 1, 0, 0, 0, 0);
-    const end = new Date(year, month + 1, 0, 23, 59, 59, 999);
+    const start = utcFromParts(year, month, 1, 0, 0, 0, 0);
+    const end = utcFromParts(year, month + 1, 0, 23, 59, 59, 999);
 
     const grouped = await this.prisma.appointment.groupBy({
       by: ['dateHour'],
@@ -466,8 +476,8 @@ export class AppointmentsService {
     const dayMap = new Map<string, number>();
 
     grouped.forEach((item) => {
-      const dayStart = new Date(item.dateHour);
-      dayStart.setHours(0, 0, 0, 0);
+      const dayStart = utcDate(item.dateHour);
+      dayStart.setUTCHours(0, 0, 0, 0);
       const dayIso = dayStart.toISOString();
       dayMap.set(dayIso, (dayMap.get(dayIso) || 0) + item._count.dateHour);
     });
@@ -559,9 +569,9 @@ export class AppointmentsService {
   }
 
   async create(body: CreateAppointmentDto, userID: number) {
-    const start = new Date(body.dateHour);
-    const end = new Date(start);
-    end.setMinutes(end.getMinutes() + body.minutesDuration);
+    const start = utcDate(body.dateHour);
+    const end = utcDate(start);
+    end.setUTCMinutes(end.getUTCMinutes() + body.minutesDuration);
     const overlaps = await this.prisma.appointment.findMany({
       where: {
         status: true,
@@ -571,8 +581,8 @@ export class AppointmentsService {
     });
 
     const hasOverlap = overlaps.some((a) => {
-      const aEnd = new Date(a.dateHour);
-      aEnd.setMinutes(aEnd.getMinutes() + a.minutesDuration);
+      const aEnd = utcDate(a.dateHour);
+      aEnd.setUTCMinutes(aEnd.getUTCMinutes() + a.minutesDuration);
       return aEnd > start;
     });
 
@@ -585,7 +595,7 @@ export class AppointmentsService {
           where: { Id: body.AppointmentRequest_Id, status: true },
           data: {
             status: false,
-            updateDate: new Date(),
+            updateDate: utcNow(),
             AppUser_Id: userID,
           },
         });
@@ -604,9 +614,9 @@ export class AppointmentsService {
   }
 
   async update(id: number, body: UpdateAppointmentDto, userID: number) {
-    const start = new Date(body.dateHour);
-    const end = new Date(start);
-    end.setMinutes(end.getMinutes() + body.minutesDuration);
+    const start = utcDate(body.dateHour);
+    const end = utcDate(start);
+    end.setUTCMinutes(end.getUTCMinutes() + body.minutesDuration);
 
     const overlaps = await this.prisma.appointment.findMany({
       where: {
@@ -618,8 +628,8 @@ export class AppointmentsService {
     });
 
     const hasOverlap = overlaps.some((a) => {
-      const aEnd = new Date(a.dateHour);
-      aEnd.setMinutes(aEnd.getMinutes() + a.minutesDuration);
+      const aEnd = utcDate(a.dateHour);
+      aEnd.setUTCMinutes(aEnd.getUTCMinutes() + a.minutesDuration);
       return aEnd > start;
     });
 
@@ -632,7 +642,7 @@ export class AppointmentsService {
       data: {
         ...body,
         notes: body.notes ? this.encryption.encrypt(body.notes) : null,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });
@@ -643,7 +653,7 @@ export class AppointmentsService {
       where: { Id: id, status: true },
       data: {
         status: false,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });

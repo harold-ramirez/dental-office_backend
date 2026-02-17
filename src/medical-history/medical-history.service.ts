@@ -3,6 +3,7 @@ import { CreateMedicalHistoryDto } from './dto/create-medical-history.dto';
 // import { UpdateMedicalHistoryDto } from './dto/update-medical-history.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcDate, utcNow } from 'src/utils/utc-date';
 import {
   adultTeethMapping,
   childTeethMapping,
@@ -247,7 +248,8 @@ export class MedicalHistoryService {
         where: { Id: createdMedicalHistory.Patient_Id },
       });
       const age = patient?.birthdate
-        ? new Date().getFullYear() - new Date(patient.birthdate).getFullYear()
+        ? utcNow().getUTCFullYear() -
+          utcDate(patient.birthdate).getUTCFullYear()
         : 0;
       const odontogram = await tx.odontogram.create({
         data: {
@@ -299,7 +301,7 @@ export class MedicalHistoryService {
   async softDelete(id: number, userID: number) {
     return await this.prisma.medicalhistoryform.update({
       where: { Id: id },
-      data: { status: false, updateDate: new Date(), AppUser_Id: userID },
+      data: { status: false, updateDate: utcNow(), AppUser_Id: userID },
     });
   }
 }

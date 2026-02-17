@@ -3,6 +3,7 @@ import { CreateDiagnosedProcedureDto } from './dto/create-diagnosed-procedure.dt
 import { UpdateDiagnosedProcedureDto } from './dto/update-diagnosed-procedure.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class DiagnosedProcedureService {
@@ -166,7 +167,7 @@ export class DiagnosedProcedureService {
         description: body.description
           ? this.encryption.encrypt(body.description)
           : null,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });
@@ -175,7 +176,7 @@ export class DiagnosedProcedureService {
   async remove(id: number, userID: number) {
     return await this.prisma.diagnosedprocedure.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date(), AppUser_Id: userID },
+      data: { status: false, updateDate: utcNow(), AppUser_Id: userID },
     });
   }
 }

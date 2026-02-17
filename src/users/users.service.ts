@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EncryptionService } from 'src/utils/encryption.service';
 import { hash, compare } from 'bcrypt';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class UsersService {
@@ -70,7 +71,7 @@ export class UsersService {
       where: { Id: userID, status: true },
       data: {
         ...encrypted,
-        updateDate: new Date(),
+        updateDate: utcNow(),
         AppUser_Id: userID,
       },
     });

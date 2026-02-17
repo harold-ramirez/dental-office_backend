@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateTreatmentDto } from './dto/create-treatment.dto';
 import { UpdateTreatmentDto } from './dto/update-treatment.dto';
 import { PrismaService } from 'src/prisma.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class TreatmentsService {
@@ -35,7 +36,7 @@ export class TreatmentsService {
       where: { Id: id, status: true },
       data: {
         ...updateTreatmentDto,
-        updateDate: new Date(),
+        updateDate: utcNow(),
       },
     });
   }
@@ -43,7 +44,7 @@ export class TreatmentsService {
   async softDelete(id: number) {
     return this.prisma.treatment.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: utcNow() },
     });
   }
 }

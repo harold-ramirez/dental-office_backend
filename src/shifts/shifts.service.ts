@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
 import { PrismaService } from 'src/prisma.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class ShiftsService {
@@ -42,7 +43,9 @@ export class ShiftsService {
 
   async create(createShiftDto: CreateShiftDto[], userID: number) {
     const res = await this.prisma.$transaction(
-      createShiftDto.map((dto) => this.prisma.shift.create({ data: {...dto, AppUser_Id: userID} })),
+      createShiftDto.map((dto) =>
+        this.prisma.shift.create({ data: { ...dto, AppUser_Id: userID } }),
+      ),
     );
 
     return res;
@@ -56,7 +59,7 @@ export class ShiftsService {
           data: {
             status: dto.status,
             AppUser_Id: userID,
-            updateDate: new Date(),
+            updateDate: utcNow(),
           },
         }),
       ),

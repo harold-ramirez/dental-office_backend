@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateHabitDto } from './dto/create-habit.dto';
 import { UpdateHabitDto } from './dto/update-habit.dto';
 import { PrismaService } from 'src/prisma.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class HabitsService {
@@ -11,10 +12,10 @@ export class HabitsService {
     return this.prisma.habits.findMany({
       where: { status: true },
       orderBy: { name: 'asc' },
-      select:{
+      select: {
         Id: true,
         name: true,
-      }
+      },
     });
   }
 
@@ -26,7 +27,7 @@ export class HabitsService {
 
   async create(createHabitDto: CreateHabitDto, userID: number) {
     return this.prisma.habits.create({
-      data: {...createHabitDto, AppUser_Id: userID},
+      data: { ...createHabitDto, AppUser_Id: userID },
     });
   }
 
@@ -35,7 +36,7 @@ export class HabitsService {
       where: { Id: id, status: true },
       data: {
         ...updateHabitDto,
-        updateDate: new Date(),
+        updateDate: utcNow(),
       },
     });
   }
@@ -43,7 +44,7 @@ export class HabitsService {
   async softDelete(id: number) {
     return this.prisma.habits.update({
       where: { Id: id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: utcNow() },
     });
   }
 }

@@ -3,6 +3,7 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class PaymentsService {
@@ -89,7 +90,7 @@ export class PaymentsService {
       if (Number(_sum.amount ?? 0) >= Number(procedure?.totalCost ?? 0)) {
         await tx.diagnosedprocedure.update({
           where: { Id: body.DiagnosedProcedure_Id, status: true },
-          data: { updateDate: new Date() },
+          data: { updateDate: utcNow() },
         });
       }
 
@@ -100,14 +101,14 @@ export class PaymentsService {
   async update(Id: number, updatePaymentDto: UpdatePaymentDto, userID: number) {
     return await this.prisma.payment.update({
       where: { Id },
-      data: { ...updatePaymentDto, updateDate: new Date(), AppUser_Id: userID },
+      data: { ...updatePaymentDto, updateDate: utcNow(), AppUser_Id: userID },
     });
   }
 
   async remove(Id: number) {
     return await this.prisma.payment.update({
       where: { Id, status: true },
-      data: { status: false, updateDate: new Date() },
+      data: { status: false, updateDate: utcNow() },
     });
   }
 }
