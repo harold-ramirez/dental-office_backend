@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { OdontogramService } from './odontogram.service';
-import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
 
@@ -30,8 +29,8 @@ export class OdontogramController {
   // }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOdontogramDto: UpdateOdontogramDto) {
-    return this.odontogramService.update(+id, updateOdontogramDto);
+  update(@Param('id') id: string, @Body() body: {toothSectionId: number, localStatus: string}[]) {
+    return this.odontogramService.update(+id, body);
   }
 
   // @Delete(':id')

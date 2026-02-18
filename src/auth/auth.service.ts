@@ -41,14 +41,16 @@ export class AuthService {
       const user = await tx.appuser.create({
         data: body,
       });
-      shifts.map(async (shift) => {
-        await tx.shift.create({
-          data: {
-            ...shift,
-            AppUser_Id: user.Id,
-          },
-        });
-      });
+      await Promise.all(
+        shifts.map(async (shift) => {
+          await tx.shift.create({
+            data: {
+              ...shift,
+              AppUser_Id: user.Id,
+            },
+          });
+        }),
+      );
       return user;
     });
     return created;

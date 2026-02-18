@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateOdontogramDto } from './dto/update-odontogram.dto';
+import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { utcNow } from 'src/utils/utc-date';
 
 @Injectable()
 export class OdontogramService {
@@ -47,7 +47,28 @@ export class OdontogramService {
     });
   }
 
-  async update(id: number, updateOdontogramDto: UpdateOdontogramDto) {
-    return `This action updates a #${id} odontogram`;
+  async update(
+    id: number,
+    body: { toothSectionId: number; localStatus: string }[],
+  ) {
+    const odontogram = await this.prisma.odontogram.findUnique({
+      where: { Id: id, status: true },
+    });
+    if (!odontogram) throw new HttpException('Odontogram not found', 404);
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await Promise.all(
+        body.map(async (item) => {
+          await tx.toothsection.update({
+            where: { Id: item.toothSectionId },
+            data: { localStatus: item.localStatus },
+          });
+        }),
+      );
+      return await tx.odontogram.update({
+        where: { Id: id, status: true },
+        data: { updateDate: utcNow() },
+      });
+    });
+    return updated;
   }
 }

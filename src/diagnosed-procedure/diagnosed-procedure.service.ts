@@ -15,6 +15,7 @@ export class DiagnosedProcedureService {
   async pendingPayments() {
     const procedures = await this.prisma.diagnosedprocedure.findMany({
       where: { status: true },
+      orderBy: { registerDate: 'desc' },
       select: {
         Id: true,
         totalCost: true,
@@ -75,19 +76,42 @@ export class DiagnosedProcedureService {
   }
 
   async preview(patientId: number) {
-    return await this.prisma.diagnosedprocedure.findMany({
+    const data = await this.prisma.diagnosedprocedure.findMany({
       take: 5,
       orderBy: { registerDate: 'desc' },
       where: { Patient_Id: patientId, status: true },
       select: {
         Id: true,
         registerDate: true,
+        totalCost: true,
         treatment: {
           select: {
             name: true,
           },
         },
+        payment: {
+          where: { status: true },
+          select: {
+            amount: true,
+          },
+        },
       },
+    });
+
+    return data.map((item) => {
+      const totalPaid = item.payment.reduce(
+        (sum, payment) => sum + Number(payment.amount),
+        0,
+      );
+      const totalCost = Number(item.totalCost || 0);
+      const isPaid = totalPaid >= totalCost;
+
+      return {
+        Id: item.Id,
+        registerDate: item.registerDate,
+        treatment: item.treatment,
+        isPaid,
+      };
     });
   }
 
@@ -112,23 +136,39 @@ export class DiagnosedProcedureService {
         registerDate: true,
         updateDate: true,
         dentalPieces: true,
+        payment: {
+          where: { status: true },
+          select: {
+            amount: true,
+          },
+        },
       },
     });
-    return await data.map((item) => ({
-      Id: item.Id,
-      description: item.description
-        ? this.encryption.decrypt(item.description)
-        : null,
-      totalCost: item.totalCost,
-      Treatment: {
-        Id: item.treatment.Id,
-        name: item.treatment.name,
-        description: item.treatment.description,
-      },
-      dentalPieces: item.dentalPieces?.split('-').length ?? 0,
-      registerDate: item.registerDate,
-      updateDate: item.updateDate,
-    }));
+    return await data.map((item) => {
+      const totalPaid = item.payment.reduce(
+        (sum, payment) => sum + Number(payment.amount),
+        0,
+      );
+      const totalCost = Number(item.totalCost || 0);
+      const isPaid = totalPaid >= totalCost;
+
+      return {
+        Id: item.Id,
+        description: item.description
+          ? this.encryption.decrypt(item.description)
+          : null,
+        totalCost: item.totalCost,
+        Treatment: {
+          Id: item.treatment.Id,
+          name: item.treatment.name,
+          description: item.treatment.description,
+        },
+        dentalPieces: item.dentalPieces?.split('-').length ?? 0,
+        registerDate: item.registerDate,
+        updateDate: item.updateDate,
+        isPaid,
+      };
+    });
   }
 
   async findOne(id: number) {
