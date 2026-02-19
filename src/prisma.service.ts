@@ -9,12 +9,13 @@ export class PrismaService
 {
   constructor() {
     const adapter = new PrismaMariaDb({
-      host: 'localhost',
-      user: 'root',
-      password: '1717',
-      database: 'dbdentaloffice',
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '0000',
+      database: process.env.DB_NAME || 'dbdentaloffice',
+      port: parseInt(process.env.DB_PORT || '3306'),
       allowPublicKeyRetrieval: true,
-      connectionLimit: 10,
+      connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
     });
     super({ adapter });
   }
