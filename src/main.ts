@@ -8,7 +8,7 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   });
-  app.setGlobalPrefix('api/v0');
+  app.setGlobalPrefix('api/v1');
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
