@@ -186,17 +186,17 @@ export class AppointmentRequestsService {
       }
     }
 
-    // Verificar si ya existe una solicitud pendiente en ese horario
-    const existingRequest = await this.prisma.appointmentrequest.findFirst({
-      where: {
-        dateHourRequest: request.dateHourRequest,
-        status: true,
-      },
-    });
+    // // Verificar si ya existe una solicitud pendiente en ese horario
+    // const existingRequest = await this.prisma.appointmentrequest.findFirst({
+    //   where: {
+    //     dateHourRequest: request.dateHourRequest,
+    //     status: true,
+    //   },
+    // });
 
-    if (existingRequest) {
-      throw new HttpException('Request already exists for this slot', 409);
-    }
+    // if (existingRequest) {
+    //   throw new HttpException('Request already exists for this slot', 409);
+    // }
 
     const encrypted = {
       ...request,
@@ -205,9 +205,10 @@ export class AppointmentRequestsService {
       message: this.encryption.encrypt(request.message),
     };
 
-    return this.prisma.appointmentrequest.create({
+    const created = await this.prisma.appointmentrequest.create({
       data: encrypted,
     });
+    return created;
   }
 
   async findAll() {

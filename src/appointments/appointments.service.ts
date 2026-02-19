@@ -320,21 +320,32 @@ export class AppointmentsService {
   async findAllWeek() {
     const now = utcNow();
     const dayOfWeek = now.getUTCDay() === 0 ? 6 : now.getUTCDay() - 1;
-    const monday = utcDate(now);
-    monday.setUTCDate(now.getUTCDate() - dayOfWeek);
-    monday.setUTCHours(0, 0, 0, 0);
 
-    const sunday = utcDate(monday);
-    sunday.setUTCDate(monday.getUTCDate() + 6);
-    sunday.setUTCHours(23, 59, 59, 999);
+    // Current week (Monday to Sunday)
+    const currentMonday = utcDate(now);
+    currentMonday.setUTCDate(now.getUTCDate() - dayOfWeek);
+    currentMonday.setUTCHours(0, 0, 0, 0);
+
+    const currentSunday = utcDate(currentMonday);
+    currentSunday.setUTCDate(currentMonday.getUTCDate() + 6);
+    currentSunday.setUTCHours(23, 59, 59, 999);
+
+    // Next week (Monday to Sunday)
+    const nextMonday = utcDate(currentMonday);
+    nextMonday.setUTCDate(currentMonday.getUTCDate() + 7);
+    nextMonday.setUTCHours(0, 0, 0, 0);
+
+    const nextSunday = utcDate(nextMonday);
+    nextSunday.setUTCDate(nextMonday.getUTCDate() + 6);
+    nextSunday.setUTCHours(23, 59, 59, 999);
 
     const data = await this.prisma.appointment.findMany({
       orderBy: { dateHour: 'asc' },
       where: {
         status: true,
         dateHour: {
-          gte: monday,
-          lte: sunday,
+          gte: currentMonday,
+          lte: nextSunday,
         },
       },
       select: {
@@ -369,8 +380,18 @@ export class AppointmentsService {
       },
     });
 
-    // Inicializar objeto con los días de la semana
-    const weekSchedule: WeekScheduleDto = {
+    // Inicializar objetos con los días de la semana para semana actual y siguiente
+    const currentWeekSchedule: WeekScheduleDto = {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
+    };
+
+    const nextWeekSchedule: WeekScheduleDto = {
       monday: [],
       tuesday: [],
       wednesday: [],
@@ -422,32 +443,43 @@ export class AppointmentsService {
             : null,
       };
 
+      // Determinar si la cita pertenece a la semana actual o siguiente
+      const isCurrentWeek =
+        appointment.dateHour >= currentMonday &&
+        appointment.dateHour <= currentSunday;
+      const targetSchedule = isCurrentWeek
+        ? currentWeekSchedule
+        : nextWeekSchedule;
+
       switch (appointmentDay) {
         case 1:
-          weekSchedule.monday.push(dto);
+          targetSchedule.monday.push(dto);
           break;
         case 2:
-          weekSchedule.tuesday.push(dto);
+          targetSchedule.tuesday.push(dto);
           break;
         case 3:
-          weekSchedule.wednesday.push(dto);
+          targetSchedule.wednesday.push(dto);
           break;
         case 4:
-          weekSchedule.thursday.push(dto);
+          targetSchedule.thursday.push(dto);
           break;
         case 5:
-          weekSchedule.friday.push(dto);
+          targetSchedule.friday.push(dto);
           break;
         case 6:
-          weekSchedule.saturday.push(dto);
+          targetSchedule.saturday.push(dto);
           break;
         case 0:
-          weekSchedule.sunday.push(dto);
+          targetSchedule.sunday.push(dto);
           break;
       }
     });
 
-    return weekSchedule;
+    return {
+      currentWeek: currentWeekSchedule,
+      nextWeek: nextWeekSchedule,
+    };
   }
 
   async findAllMonth() {
@@ -455,16 +487,38 @@ export class AppointmentsService {
     const year = now.getUTCFullYear();
     const month = now.getUTCMonth();
 
-    const start = utcFromParts(year, month, 1, 0, 0, 0, 0);
-    const end = utcFromParts(year, month + 1, 0, 23, 59, 59, 999);
+    // Current month
+    const currentMonthStart = utcFromParts(year, month, 1, 0, 0, 0, 0);
+    const currentMonthEnd = utcFromParts(year, month + 1, 0, 23, 59, 59, 999);
+
+    // Next month
+    const nextMonthDate = utcFromParts(year, month + 1, 1);
+    const nextMonthStart = utcFromParts(
+      nextMonthDate.getUTCFullYear(),
+      nextMonthDate.getUTCMonth(),
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    const nextMonthEnd = utcFromParts(
+      nextMonthDate.getUTCFullYear(),
+      nextMonthDate.getUTCMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
     const grouped = await this.prisma.appointment.groupBy({
       by: ['dateHour'],
       where: {
         status: true,
         dateHour: {
-          gte: start,
-          lte: end,
+          gte: currentMonthStart,
+          lte: nextMonthEnd,
         },
       },
       _count: {
@@ -472,21 +526,40 @@ export class AppointmentsService {
       },
     });
 
-    const result: { day: string; count: number }[] = [];
-    const dayMap = new Map<string, number>();
+    const currentMonthMap = new Map<string, number>();
+    const nextMonthMap = new Map<string, number>();
 
     grouped.forEach((item) => {
       const dayStart = utcDate(item.dateHour);
       dayStart.setUTCHours(0, 0, 0, 0);
       const dayIso = dayStart.toISOString();
-      dayMap.set(dayIso, (dayMap.get(dayIso) || 0) + item._count.dateHour);
+
+      // Determinar si pertenece al mes actual o siguiente
+      const isCurrentMonth =
+        item.dateHour >= currentMonthStart && item.dateHour <= currentMonthEnd;
+      const targetMap = isCurrentMonth ? currentMonthMap : nextMonthMap;
+
+      targetMap.set(
+        dayIso,
+        (targetMap.get(dayIso) || 0) + item._count.dateHour,
+      );
     });
 
-    dayMap.forEach((count, dayIso) => {
-      result.push({ day: dayIso, count });
+    const currentMonth: { day: string; count: number }[] = [];
+    const nextMonth: { day: string; count: number }[] = [];
+
+    currentMonthMap.forEach((count, dayIso) => {
+      currentMonth.push({ day: dayIso, count });
     });
 
-    return result;
+    nextMonthMap.forEach((count, dayIso) => {
+      nextMonth.push({ day: dayIso, count });
+    });
+
+    return {
+      currentMonth,
+      nextMonth,
+    };
   }
 
   async findOne(id: number) {

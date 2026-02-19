@@ -292,7 +292,7 @@ model tooth {
 }
 
 model toothsection {
-  Id          Int     @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  Id          BigInt  @id @unique(map: "Id_UNIQUE") @default(autoincrement()) @db.UnsignedBigInt
   name        String? @db.VarChar(45)
   localStatus String? @default("white") @db.VarChar(45)
   Tooth_Id    Int     @db.UnsignedInt

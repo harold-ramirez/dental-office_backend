@@ -10,7 +10,6 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { AppointmentRequestsModule } from './appointment-requests/appointment-requests.module';
 import { ImagesModule } from './images/images.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { GatewayModule } from './websocket/websocket.module';
 import { DiagnosedProcedureModule } from './diagnosed-procedure/diagnosed-procedure.module';
 import { PaymentsModule } from './payments/payments.module';
 import { MedicalHistoryModule } from './medical-history/medical-history.module';
@@ -48,7 +47,6 @@ import { APP_GUARD } from '@nestjs/core';
     AppointmentsModule,
     AppointmentRequestsModule,
     ImagesModule,
-    GatewayModule,
     DiagnosedProcedureModule,
     PaymentsModule,
     MedicalHistoryModule,
