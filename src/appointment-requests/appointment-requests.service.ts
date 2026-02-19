@@ -186,18 +186,6 @@ export class AppointmentRequestsService {
       }
     }
 
-    // // Verificar si ya existe una solicitud pendiente en ese horario
-    // const existingRequest = await this.prisma.appointmentrequest.findFirst({
-    //   where: {
-    //     dateHourRequest: request.dateHourRequest,
-    //     status: true,
-    //   },
-    // });
-
-    // if (existingRequest) {
-    //   throw new HttpException('Request already exists for this slot', 409);
-    // }
-
     const encrypted = {
       ...request,
       patientFullName: this.encryption.encrypt(request.patientFullName),

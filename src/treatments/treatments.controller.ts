@@ -15,24 +15,9 @@ export class TreatmentsController {
   findAll() {
     return this.treatmentsService.findAll();
   }
-  
-  // @Get('/:id')
-  // findOne(@Param('id') id: string) {
-  //   return this.treatmentsService.findOne(+id);
-  // }
 
   @Post()
   create(@Body() createTreatmentDto: CreateTreatmentDto, @User() user: JwtUser) {
     return this.treatmentsService.create(createTreatmentDto, user.userID);
   }
-
-  // @Patch('/:id')
-  // update(@Param('id') id: string, @Body() updateTreatmentDto: UpdateTreatmentDto) {
-  //   return this.treatmentsService.update(+id, updateTreatmentDto);
-  // }
-
-  // @Delete('/:id')
-  // softDelete(@Param('id') id: string) {
-  //   return this.treatmentsService.softDelete(+id);
-  // }
 }

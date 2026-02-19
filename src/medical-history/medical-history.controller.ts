@@ -31,14 +31,4 @@ export class MedicalHistoryController {
   create(@Body() body: CreateMedicalHistoryDto, @User() user: JwtUser) {
     return this.medicalHistoryService.create(body, user.userID);
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateMedicalHistoryDto: UpdateMedicalHistoryDto, @User() user: JwtUser) {
-  //   return this.medicalHistoryService.update(+id, updateMedicalHistoryDto);
-  // }
-
-  // @Delete('/:id')
-  // softDelete(@Param('id') id: string, @User() user: JwtUser) {
-  //   return this.medicalHistoryService.softDelete(+id, user.userID);
-  // }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMedicalHistoryDto } from './dto/create-medical-history.dto';
-// import { UpdateMedicalHistoryDto } from './dto/update-medical-history.dto';
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
 import { utcDate, utcNow } from 'src/utils/utc-date';
@@ -293,10 +292,6 @@ export class MedicalHistoryService {
     });
     return result;
   }
-
-  // async update(id: number, updateMedicalHistoryDto: UpdateMedicalHistoryDto) {
-  //   return `This action updates a #${id} medicalHistory`;
-  // }
 
   async softDelete(id: number, userID: number) {
     return await this.prisma.medicalhistoryform.update({

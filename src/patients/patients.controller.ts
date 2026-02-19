@@ -55,9 +55,4 @@ export class PatientsController {
   ) {
     return this.patientsService.update(+id, updatePatientDto, user.userID);
   }
-
-  // @Delete('/:id')
-  // softDelete(@Param('id') id: string, @User() user: JwtUser) {
-  //   return this.patientsService.softDelete(+id, user.userID);
-  // }
 }

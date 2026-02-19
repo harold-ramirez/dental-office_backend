@@ -111,7 +111,6 @@ export class ImagesService {
         },
       });
     } catch (error) {
-      console.log('Error while deleting image:', error);
       throw new InternalServerErrorException('Error al eliminar imagen');
     }
   }

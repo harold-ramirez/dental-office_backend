@@ -19,8 +19,6 @@ import { EncryptionService } from './utils/encryption.service';
 import { PrismaModule } from './prisma.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-// import { ServeStaticModule } from '@nestjs/serve-static';
-// import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,10 +32,6 @@ import { APP_GUARD } from '@nestjs/core';
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60, limit: 120 }],
     }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'uploads'),
-    //   serveRoot: '/uploads',
-    // }),
     TreatmentsModule,
     UsersModule,
     ShiftsModule,

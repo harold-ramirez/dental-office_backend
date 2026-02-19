@@ -61,12 +61,6 @@ export class AppointmentRequestsController {
     return this.appointmentRequestsService.findAllPast(pageNum, pageSizeNum);
   }
 
-  // @UseGuards(JwtAuthGuard, UserThrottlerGuard)
-  // @Get('/:id')
-  // findOne(@Param('id') id: string) {
-  //   return this.appointmentRequestsService.findOne(+id);
-  // }
-
   @UseGuards(JwtAuthGuard, UserThrottlerGuard)
   @Delete('/:id')
   denyRequest(@Param('id') id: string, @User() user: JwtUser) {
