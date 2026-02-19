@@ -3,14 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
 } from '@nestjs/common';
 import { MedicalHistoryService } from './medical-history.service';
 import { CreateMedicalHistoryDto } from './dto/create-medical-history.dto';
-// import { UpdateMedicalHistoryDto } from './dto/update-medical-history.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtUser, User } from 'src/auth/user.decorator';
 import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
@@ -40,8 +37,8 @@ export class MedicalHistoryController {
   //   return this.medicalHistoryService.update(+id, updateMedicalHistoryDto);
   // }
 
-  @Delete('/:id')
-  softDelete(@Param('id') id: string, @User() user: JwtUser) {
-    return this.medicalHistoryService.softDelete(+id, user.userID);
-  }
+  // @Delete('/:id')
+  // softDelete(@Param('id') id: string, @User() user: JwtUser) {
+  //   return this.medicalHistoryService.softDelete(+id, user.userID);
+  // }
 }

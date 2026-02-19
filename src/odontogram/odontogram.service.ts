@@ -15,7 +15,7 @@ export class OdontogramService {
   }
 
   async findAll(patientID: number) {
-    return await this.prisma.odontogram.findMany({
+    const data = await this.prisma.odontogram.findMany({
       orderBy: { registerDate: 'desc' },
       where: {
         status: true,
@@ -45,6 +45,19 @@ export class OdontogramService {
         },
       },
     });
+
+    return data.map((odontogram) => ({
+      ...odontogram,
+      Id: Number(odontogram.Id),
+      tooth: odontogram.tooth.map((t) => ({
+        ...t,
+        Id: Number(t.Id),
+        toothsection: t.toothsection.map((ts) => ({
+          ...ts,
+          Id: Number(ts.Id),
+        })),
+      })),
+    }));
   }
 
   async update(

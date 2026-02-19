@@ -5,8 +5,8 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
@@ -21,8 +21,10 @@ export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
   @Get('/')
-  findAll() {
-    return this.patientsService.findAll();
+  findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 10;
+    return this.patientsService.findAll(pageNum, pageSizeNum);
   }
 
   @Get('/names')
@@ -54,8 +56,8 @@ export class PatientsController {
     return this.patientsService.update(+id, updatePatientDto, user.userID);
   }
 
-  @Delete('/:id')
-  softDelete(@Param('id') id: string, @User() user: JwtUser) {
-    return this.patientsService.softDelete(+id, user.userID);
-  }
+  // @Delete('/:id')
+  // softDelete(@Param('id') id: string, @User() user: JwtUser) {
+  //   return this.patientsService.softDelete(+id, user.userID);
+  // }
 }

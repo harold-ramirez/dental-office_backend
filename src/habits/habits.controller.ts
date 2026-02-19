@@ -16,23 +16,23 @@ export class HabitsController {
     return this.habitsService.findAll();
   }
   
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.habitsService.findOne(+id);
-  }
+  // @Get('/:id')
+  // findOne(@Param('id') id: string) {
+  //   return this.habitsService.findOne(+id);
+  // }
 
   @Post()
   create(@Body() createHabitDto: CreateHabitDto, @User() user: JwtUser) {
     return this.habitsService.create(createHabitDto, user.userID);
   }
 
-  @Patch('/:id')
-  update(@Param('id') id: string, @Body() updateHabitDto: UpdateHabitDto) {
-    return this.habitsService.update(+id, updateHabitDto);
-  }
+  // @Patch('/:id')
+  // update(@Param('id') id: string, @Body() updateHabitDto: UpdateHabitDto) {
+  //   return this.habitsService.update(+id, updateHabitDto);
+  // }
 
-  @Delete('/:id')
-  softDelete(@Param('id') id: string) {
-    return this.habitsService.softDelete(+id);
-  }
+  // @Delete('/:id')
+  // softDelete(@Param('id') id: string) {
+  //   return this.habitsService.softDelete(+id);
+  // }
 }

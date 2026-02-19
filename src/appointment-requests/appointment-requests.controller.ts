@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { AppointmentRequestsService } from './appointment-requests.service';
 import { CreateAppointmentRequestDto } from './dto/create-appointment-request.dto';
@@ -43,21 +44,28 @@ export class AppointmentRequestsController {
 
   @UseGuards(JwtAuthGuard, UserThrottlerGuard)
   @Get('/')
-  findAll() {
-    return this.appointmentRequestsService.findAll();
+  findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 10;
+    return this.appointmentRequestsService.findAll(pageNum, pageSizeNum);
   }
 
   @UseGuards(JwtAuthGuard, UserThrottlerGuard)
   @Get('/pastRequests')
-  findAllPast() {
-    return this.appointmentRequestsService.findAllPast();
+  findAllPast(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 10;
+    return this.appointmentRequestsService.findAllPast(pageNum, pageSizeNum);
   }
 
-  @UseGuards(JwtAuthGuard, UserThrottlerGuard)
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.appointmentRequestsService.findOne(+id);
-  }
+  // @UseGuards(JwtAuthGuard, UserThrottlerGuard)
+  // @Get('/:id')
+  // findOne(@Param('id') id: string) {
+  //   return this.appointmentRequestsService.findOne(+id);
+  // }
 
   @UseGuards(JwtAuthGuard, UserThrottlerGuard)
   @Delete('/:id')

@@ -12,34 +12,54 @@ export class PatientsService {
     private encryption: EncryptionService,
   ) {}
 
-  async findAll() {
-    const dbPatients = await this.prisma.patient.findMany({
-      where: { status: true },
-      orderBy: { registerDate: 'desc' },
-    });
+  async findAll(page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
 
-    return dbPatients.map((patient) => ({
-      ...patient,
-      name: this.encryption.decrypt(patient.name),
-      paternalSurname: patient.paternalSurname
-        ? this.encryption.decrypt(patient.paternalSurname)
-        : null,
-      maternalSurname: patient.maternalSurname
-        ? this.encryption.decrypt(patient.maternalSurname)
-        : null,
-      cellphoneNumber: patient.cellphoneNumber
-        ? this.encryption.decrypt(patient.cellphoneNumber)
-        : null,
-      telephoneNumber: patient.telephoneNumber
-        ? this.encryption.decrypt(patient.telephoneNumber)
-        : null,
-      placeOfBirth: patient.placeOfBirth
-        ? this.encryption.decrypt(patient.placeOfBirth)
-        : null,
-      address: patient.address
-        ? this.encryption.decrypt(patient.address)
-        : null,
-    }));
+    const [dbPatients, total] = await Promise.all([
+      this.prisma.patient.findMany({
+        where: { status: true },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.patient.count({
+        where: { status: true },
+      }),
+    ]);
+
+    return dbPatients
+      .map((patient) => ({
+        ...patient,
+        name: this.encryption.decrypt(patient.name),
+        paternalSurname: patient.paternalSurname
+          ? this.encryption.decrypt(patient.paternalSurname)
+          : null,
+        maternalSurname: patient.maternalSurname
+          ? this.encryption.decrypt(patient.maternalSurname)
+          : null,
+        cellphoneNumber: patient.cellphoneNumber
+          ? this.encryption.decrypt(patient.cellphoneNumber)
+          : null,
+        telephoneNumber: patient.telephoneNumber
+          ? this.encryption.decrypt(patient.telephoneNumber)
+          : null,
+        placeOfBirth: patient.placeOfBirth
+          ? this.encryption.decrypt(patient.placeOfBirth)
+          : null,
+        address: patient.address
+          ? this.encryption.decrypt(patient.address)
+          : null,
+      }))
+      .sort((a, b) => {
+        const fullNameA = [a.name, a.paternalSurname, a.maternalSurname]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        const fullNameB = [b.name, b.paternalSurname, b.maternalSurname]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return fullNameA.localeCompare(fullNameB);
+      });
   }
 
   async getPatientsNames() {
@@ -143,27 +163,13 @@ export class PatientsService {
   }
 
   async searchByName(name: string) {
-    const words = name.trim().split(/\s+/);
+    const searchTerm = name.trim().toLowerCase();
+
     const dbPatients = await this.prisma.patient.findMany({
-      where: {
-        status: true,
-        AND: words.map((word) => ({
-          OR: [
-            { name: { contains: word } },
-            { paternalSurname: { contains: word } },
-            { maternalSurname: { contains: word } },
-          ],
-        })),
-      },
-      select: {
-        Id: true,
-        name: true,
-        paternalSurname: true,
-        maternalSurname: true,
-      },
+      where: { status: true },
     });
 
-    return dbPatients.map((patient) => ({
+    const decryptedPatients = dbPatients.map((patient) => ({
       ...patient,
       name: this.encryption.decrypt(patient.name),
       paternalSurname: patient.paternalSurname
@@ -172,7 +178,43 @@ export class PatientsService {
       maternalSurname: patient.maternalSurname
         ? this.encryption.decrypt(patient.maternalSurname)
         : null,
+      cellphoneNumber: patient.cellphoneNumber
+        ? this.encryption.decrypt(patient.cellphoneNumber)
+        : null,
+      telephoneNumber: patient.telephoneNumber
+        ? this.encryption.decrypt(patient.telephoneNumber)
+        : null,
+      placeOfBirth: patient.placeOfBirth
+        ? this.encryption.decrypt(patient.placeOfBirth)
+        : null,
+      address: patient.address
+        ? this.encryption.decrypt(patient.address)
+        : null,
     }));
+
+    return decryptedPatients
+      .filter((patient) => {
+        const fullName = [
+          patient.name,
+          patient.paternalSurname,
+          patient.maternalSurname,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return fullName.includes(searchTerm);
+      })
+      .sort((a, b) => {
+        const fullNameA = [a.name, a.paternalSurname, a.maternalSurname]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        const fullNameB = [b.name, b.paternalSurname, b.maternalSurname]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return fullNameA.localeCompare(fullNameB);
+      });
   }
 
   async create(createPatientDto: CreatePatientDto, userID: number) {

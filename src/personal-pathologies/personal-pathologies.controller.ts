@@ -27,29 +27,29 @@ export class PersonalPathologiesController {
     return this.personalPathologiesService.findAll();
   }
 
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.personalPathologiesService.findOne(+id);
-  }
+  // @Get('/:id')
+  // findOne(@Param('id') id: string) {
+  //   return this.personalPathologiesService.findOne(+id);
+  // }
 
   @Post()
   create(@Body() createPersonalPathologyDto: CreatePersonalPathologyDto, @User() user: JwtUser) {
     return this.personalPathologiesService.create(createPersonalPathologyDto, user.userID);
   }
 
-  @Patch('/:id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePersonalPathologyDto: UpdatePersonalPathologyDto,
-  ) {
-    return this.personalPathologiesService.update(
-      +id,
-      updatePersonalPathologyDto,
-    );
-  }
+  // @Patch('/:id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updatePersonalPathologyDto: UpdatePersonalPathologyDto,
+  // ) {
+  //   return this.personalPathologiesService.update(
+  //     +id,
+  //     updatePersonalPathologyDto,
+  //   );
+  // }
 
-  @Delete('/:id')
-  softDelete(@Param('id') id: string) {
-    return this.personalPathologiesService.softDelete(+id);
-  }
+  // @Delete('/:id')
+  // softDelete(@Param('id') id: string) {
+  //   return this.personalPathologiesService.softDelete(+id);
+  // }
 }

@@ -211,27 +211,37 @@ export class AppointmentRequestsService {
     return created;
   }
 
-  async findAll() {
-    const dbRequests = await this.prisma.appointmentrequest.findMany({
-      where: { status: true },
-      orderBy: { registerDate: 'desc' },
-      select: {
-        Id: true,
-        patientFullName: true,
-        dateHourRequest: true,
-        phoneNumber: true,
-        message: true,
-        appuser: {
-          select: {
-            Id: true,
-            username: true,
+  async findAll(page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
+
+    const [dbRequests, total] = await Promise.all([
+      this.prisma.appointmentrequest.findMany({
+        where: { status: true },
+        orderBy: { registerDate: 'desc' },
+        skip,
+        take: pageSize,
+        select: {
+          Id: true,
+          patientFullName: true,
+          dateHourRequest: true,
+          phoneNumber: true,
+          message: true,
+          appuser: {
+            select: {
+              Id: true,
+              username: true,
+            },
           },
+          registerDate: true,
+          status: true,
+          updateDate: true,
         },
-        registerDate: true,
-        status: true,
-        updateDate: true,
-      },
-    });
+      }),
+      this.prisma.appointmentrequest.count({
+        where: { status: true },
+      }),
+    ]);
+
     return dbRequests.map((request) => ({
       ...request,
       patientFullName: this.encryption.decrypt(request.patientFullName),
@@ -240,26 +250,35 @@ export class AppointmentRequestsService {
     }));
   }
 
-  async findAllPast() {
-    const dbRequests = await this.prisma.appointmentrequest.findMany({
-      where: { status: false },
-      select: {
-        Id: true,
-        patientFullName: true,
-        dateHourRequest: true,
-        phoneNumber: true,
-        message: true,
-        appuser: {
-          select: {
-            Id: true,
-            username: true,
+  async findAllPast(page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
+
+    const [dbRequests, total] = await Promise.all([
+      this.prisma.appointmentrequest.findMany({
+        where: { status: false },
+        skip,
+        take: pageSize,
+        select: {
+          Id: true,
+          patientFullName: true,
+          dateHourRequest: true,
+          phoneNumber: true,
+          message: true,
+          appuser: {
+            select: {
+              Id: true,
+              username: true,
+            },
           },
+          registerDate: true,
+          status: true,
+          updateDate: true,
         },
-        registerDate: true,
-        status: true,
-        updateDate: true,
-      },
-    });
+      }),
+      this.prisma.appointmentrequest.count({
+        where: { status: false },
+      }),
+    ]);
 
     return dbRequests.map((request) => ({
       ...request,

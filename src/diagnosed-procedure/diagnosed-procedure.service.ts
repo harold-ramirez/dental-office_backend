@@ -115,13 +115,17 @@ export class DiagnosedProcedureService {
     });
   }
 
-  async findAll(patientId: number) {
+  async findAll(patientId: number, page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
+
     const data = await this.prisma.diagnosedprocedure.findMany({
       orderBy: { registerDate: 'desc' },
       where: {
         Patient_Id: patientId,
         status: true,
       },
+      skip,
+      take: pageSize,
       select: {
         Id: true,
         description: true,
@@ -144,7 +148,7 @@ export class DiagnosedProcedureService {
         },
       },
     });
-    return await data.map((item) => {
+    return data.map((item) => {
       const totalPaid = item.payment.reduce(
         (sum, payment) => sum + Number(payment.amount),
         0,

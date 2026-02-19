@@ -50,10 +50,10 @@ export class AppointmentsController {
     return this.appointmentsService.findAllMonth();
   }
 
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.appointmentsService.findOne(+id);
-  }
+  // @Get('/:id')
+  // findOne(@Param('id') id: string) {
+  //   return this.appointmentsService.findOne(+id);
+  // }
 
   @Post()
   create(@Body() body: CreateAppointmentDto, @User() user: JwtUser) {

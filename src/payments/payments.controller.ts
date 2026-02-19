@@ -25,23 +25,23 @@ export class PaymentsController {
     return this.paymentsService.findAll(+diagnosedProcedureId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.paymentsService.findOne(+id);
+  // }
 
   @Post()
   create(@Body() createPaymentDto: CreatePaymentDto, @User() user: JwtUser) {
     return this.paymentsService.create(createPaymentDto, user.userID);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto, @User() user: JwtUser) {
-    return this.paymentsService.update(+id, updatePaymentDto, user.userID);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto, @User() user: JwtUser) {
+  //   return this.paymentsService.update(+id, updatePaymentDto, user.userID);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.paymentsService.remove(+id);
+  // }
 }
