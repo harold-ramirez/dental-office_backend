@@ -157,7 +157,8 @@ export class AppointmentRequestsService {
       orderBy: { registerDate: 'asc' },
       select: { phoneNumber: true },
     });
-    return waNumber?.phoneNumber;
+    if (!waNumber?.phoneNumber) return undefined;
+    return this.encryption.decrypt(waNumber.phoneNumber);
   }
 
   async sendRequest(request: CreateAppointmentRequestDto) {
