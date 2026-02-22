@@ -217,30 +217,35 @@ export class PatientsService {
       });
   }
 
-  async create(createPatientDto: CreatePatientDto, userID: number) {
+  async create(body: CreatePatientDto, userID: number) {
+    const duplicate = await this.prisma.patient.findFirst({
+      where: {
+        identityDocument: body.identityDocument,
+        status: true,
+      },
+    });
+    if (duplicate) throw new HttpException('Patient already exists', 409);
     const encrypted = {
-      ...createPatientDto,
-      name: this.encryption.encrypt(createPatientDto.name),
-      paternalSurname: createPatientDto.paternalSurname
-        ? this.encryption.encrypt(createPatientDto.paternalSurname)
+      ...body,
+      name: this.encryption.encrypt(body.name),
+      paternalSurname: body.paternalSurname
+        ? this.encryption.encrypt(body.paternalSurname)
         : null,
-      maternalSurname: createPatientDto.maternalSurname
-        ? this.encryption.encrypt(createPatientDto.maternalSurname)
+      maternalSurname: body.maternalSurname
+        ? this.encryption.encrypt(body.maternalSurname)
         : null,
-      cellphoneNumber: createPatientDto.cellphoneNumber
-        ? this.encryption.encrypt(createPatientDto.cellphoneNumber)
+      cellphoneNumber: body.cellphoneNumber
+        ? this.encryption.encrypt(body.cellphoneNumber)
         : null,
-      telephoneNumber: createPatientDto.telephoneNumber
-        ? this.encryption.encrypt(createPatientDto.telephoneNumber)
+      telephoneNumber: body.telephoneNumber
+        ? this.encryption.encrypt(body.telephoneNumber)
         : null,
-      placeOfBirth: createPatientDto.placeOfBirth
-        ? this.encryption.encrypt(createPatientDto.placeOfBirth)
+      placeOfBirth: body.placeOfBirth
+        ? this.encryption.encrypt(body.placeOfBirth)
         : null,
-      address: createPatientDto.address
-        ? this.encryption.encrypt(createPatientDto.address)
-        : null,
+      address: body.address ? this.encryption.encrypt(body.address) : null,
     };
-    return this.prisma.patient.create({
+    return await this.prisma.patient.create({
       data: {
         ...encrypted,
         AppUser_Id: userID,
