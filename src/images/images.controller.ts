@@ -17,10 +17,14 @@ import { UpdateImageDto } from './dto/update-image.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, resolve } from 'path';
+import * as fs from 'fs';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtUser, User } from 'src/auth/user.decorator';
 import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
+
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
+const uploadRoot = resolve(process.cwd(), uploadDir);
 
 @UseGuards(JwtAuthGuard, UserThrottlerGuard)
 @Controller('images')
@@ -34,14 +38,17 @@ export class ImagesController {
 
   @Get('/file/:filename')
   getImageFile(@Param('filename') filename: string, @Res() res: Response) {
-    return res.sendFile(filename, { root: './uploads' });
+    return res.sendFile(filename, { root: uploadRoot });
   }
 
   @Post()
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: (req, file, cb) => {
+          fs.mkdirSync(uploadRoot, { recursive: true });
+          cb(null, uploadRoot);
+        },
         filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);

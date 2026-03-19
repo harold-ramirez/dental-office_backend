@@ -8,8 +8,10 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { PrismaService } from 'src/prisma.service';
 import * as fs from 'fs';
-import { join } from 'path';
+import { resolve } from 'path';
 import { EncryptionService } from 'src/utils/encryption.service';
+
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
 
 @Injectable()
 export class ImagesService {
@@ -100,7 +102,7 @@ export class ImagesService {
       if (!img) throw new HttpException('IMAGE_NOT_FOUND', 404);
 
       // Delete physical file
-      const filePath = join(__dirname, '..', '..', 'uploads', img.fileName);
+      const filePath = resolve(process.cwd(), uploadDir, img.fileName);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }

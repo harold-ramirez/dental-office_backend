@@ -56,11 +56,12 @@ export class UsersService {
         : null;
     }
     if (body.phoneNumber !== undefined) {
-      encrypted.cellphoneNumber = body.phoneNumber
+      encrypted.phoneNumber = body.phoneNumber
         ? this.encryption.encrypt(body.phoneNumber)
         : null;
     }
     // Campos no encriptados
+    if (body.username !== undefined) encrypted.username = body.username;
     if (body.gender !== undefined) encrypted.gender = body.gender;
     if (body.defaultMessage !== undefined)
       encrypted.defaultMessage = body.defaultMessage;

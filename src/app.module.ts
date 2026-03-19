@@ -20,6 +20,8 @@ import { PrismaModule } from './prisma.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,7 +29,7 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     PrismaModule,
     MulterModule.register({
-      dest: './uploads',
+      dest: uploadDir,
     }),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60, limit: 120 }],
