@@ -3,11 +3,13 @@ import { AppointmentRequestsService } from './appointment-requests.service';
 import { AppointmentRequestsController } from './appointment-requests.controller';
 import { EncryptionService } from 'src/utils/encryption.service';
 import { UserThrottlerGuard } from 'src/auth/user-throttler.guard';
+import { AppointmentRequestsGateway } from './appointment-requests.gateway';
 
 @Module({
   controllers: [AppointmentRequestsController],
   providers: [
     AppointmentRequestsService,
+    AppointmentRequestsGateway,
     EncryptionService,
     UserThrottlerGuard,
   ],

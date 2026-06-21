@@ -3,12 +3,14 @@ import { CreateAppointmentRequestDto } from './dto/create-appointment-request.dt
 import { PrismaService } from 'src/prisma.service';
 import { EncryptionService } from 'src/utils/encryption.service';
 import { utcDate, utcNow } from 'src/utils/utc-date';
+import { AppointmentRequestsGateway } from './appointment-requests.gateway';
 
 @Injectable()
 export class AppointmentRequestsService {
   constructor(
     private prisma: PrismaService,
     private encryption: EncryptionService,
+    private appointmentRequestsGateway: AppointmentRequestsGateway,
   ) {}
 
   async getLandingCalendar() {
@@ -244,6 +246,11 @@ export class AppointmentRequestsService {
     const created = await this.prisma.appointmentrequest.create({
       data: encrypted,
     });
+
+    this.appointmentRequestsGateway.notifyAppointmentRequestCreated(
+      request.patientFullName,
+    );
+
     return created;
   }
 
