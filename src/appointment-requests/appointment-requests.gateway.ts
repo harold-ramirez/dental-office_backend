@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -6,6 +6,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ConfigService } from '@nestjs/config';
+import * as jwt from 'jsonwebtoken';
 
 @WebSocketGateway({
   cors: {
@@ -19,10 +21,40 @@ export class AppointmentRequestsGateway
   private readonly logger = new Logger(AppointmentRequestsGateway.name);
 
   @WebSocketServer()
-  server: Server;
+  server!: Server;
+
+  constructor(private configService: ConfigService) {}
 
   handleConnection(client: Socket) {
-    this.logger.debug(`Socket connected: ${client.id}`);
+    try {
+      const token = client.handshake.auth.token;
+      if (!token) {
+        this.logger.warn(
+          `Socket connection attempt without token: ${client.id}`,
+        );
+        client.disconnect();
+        return;
+      }
+
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+      if (!jwtSecret) {
+        throw new UnauthorizedException('JWT_SECRET not configured');
+      }
+
+      const decoded = jwt.verify(token, jwtSecret);
+      client.data.user = decoded;
+
+      this.logger.debug(
+        `Socket connected: ${client.id} - User: ${decoded.sub}`,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Authentication failed for socket ${client.id}: ${errorMessage}`,
+      );
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {
