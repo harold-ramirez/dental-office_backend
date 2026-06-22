@@ -11,7 +11,10 @@ import * as jwt from 'jsonwebtoken';
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.FRONTEND_URL?.split(',') || '*',
+    origin:
+      process.env.MOBILE_APP_ENABLED === 'true'
+        ? true // Acepta el origen de la request
+        : process.env.FRONTEND_URL?.split(',') || '*',
     credentials: true,
   },
 })
@@ -26,6 +29,13 @@ export class AppointmentRequestsGateway
   constructor(private configService: ConfigService) {}
 
   handleConnection(client: Socket) {
+    console.log('📡 Intento de conexión WebSocket:');
+    console.log('  - ID del cliente:', client.id);
+    console.log('  - Origen:', client.handshake.headers.origin);
+    console.log(
+      '  - Auth token:',
+      client.handshake.auth.token ? '✓ Presente' : '✗ Falta',
+    );
     try {
       const token = client.handshake.auth.token;
       if (!token) {
