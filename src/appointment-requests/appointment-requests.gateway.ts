@@ -10,12 +10,10 @@ import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
 @WebSocketGateway({
+  namespace: '/', // Socket.IO en la raíz, no bajo /api/vdemo
   cors: {
-    origin:
-      process.env.MOBILE_APP_ENABLED === 'true'
-        ? true // Acepta el origen de la request
-        : process.env.FRONTEND_URL?.split(',') || '*',
-    credentials: true,
+    origin: "*",
+    credentials: false,
   },
 })
 export class AppointmentRequestsGateway
